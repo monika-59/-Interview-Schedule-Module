@@ -1,0 +1,39 @@
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Online Exam System</h2>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- LEFT SIDE: VIDEO -->
+    <div class="video-section">
+      <video #video autoplay muted></video>
+
+      <div class="btn-group">
+        <button (click)="startMonitoring()">Start Camera</button>
+        <button (click)="stopMonitoring()">Stop Camera</button>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: QUESTIONS -->
+    <div class="question-section">
+
+      <h3>Question</h3>
+      <p>{{ currentQuestion?.question_text }}</p>
+
+      <h4>Time Left: {{ formattedTime }}</h4>
+
+      <textarea [(ngModel)]="answer" rows="6" placeholder="Your answer will appear here..."></textarea>
+
+      <div class="btn-group">
+        <button (click)="nextQuestion()">Next Question</button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
