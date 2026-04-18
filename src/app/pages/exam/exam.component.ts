@@ -1,7 +1,8 @@
-import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-exam',
@@ -10,66 +11,297 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './exam.component.html',
   styleUrl: './exam.component.css'
 })
-export class ExamComponent implements OnInit {
+export class ExamComponent {
 
   @ViewChild('video') videoRef!: ElementRef;
 
-  stream: MediaStream | null = null;
-  mediaRecorder: any;
-  recordedChunks: any[] = [];
+  // ---------------- STREAMS ----------------
+  combinedStream: MediaStream | null = null;
+  videoStream: MediaStream | null = null;
+  audioStream: MediaStream | null = null;
 
+  // ---------------- RECORDERS ----------------
+  videoRecorder: any;
+  audioRecorder: any;
+
+  fullVideo: Blob[] = [];
+
+  // ---------------- FLAGS ----------------
+  audioLoopRunning = false;
+  interviewCompleted = false;
+  isSpeaking = false; // 🔥 IMPORTANT (TTS control)
+
+  // ---------------- DATA ----------------
   answer: string = '';
   currentQuestion: any = null;
 
-  timeLeft: number = 120;
+  interviewId: string = '';
+
+  uploadQueue: Blob[] = [];
+  processingQueue = false;
+
+  faceCheckInterval: any;
+
+  timeLeft = 40;
   interval: any;
-  captureInterval: any;
 
-  constructor(private http: HttpClient) {}
+  silenceCounter = 0;
+  silenceThreshold = 10;
 
-  ngOnInit() {
-    this.loadRandomQuestion();
-    this.startTimer();
+  questionStartTime: number = 0;
+  questionEndTime: number = 0;
+  interviewDetails: any = null;
+
+  constructor(private http: HttpClient, private route: ActivatedRoute) {}
+
+  // ================= START BUTTON CLICK =================
+  startInterview() {
+
+    const interviewId = 3; // TODO: replace with dynamic
+
+    this.http.get<any>(`http://127.0.0.1:8000/interview/${interviewId}`)
+      .subscribe({
+        next: async (res) => {
+
+          this.interviewDetails = res;
+          this.interviewId = res.id;
+
+          await this.initStreams();
+
+          this.startVideoRecording();
+          this.startAudioLoop();
+
+          this.loadNextQuestion();
+          this.startTimer();
+          this.startFaceDetection();
+        },
+        error: (err) => console.error(err)
+      });
   }
 
-  // ---------------- QUESTION ----------------
-  loadRandomQuestion() {
-    console.log('📥 Fetching question from backend...');
+  // ================= INIT STREAM =================
+  async initStreams() {
 
-    this.http.get<any>('http://127.0.0.1:8000/questions/random')
+    if (this.combinedStream) return;
+
+    this.combinedStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: {
+        noiseSuppression: true,
+        echoCancellation: true,
+        autoGainControl: true
+      }
+    });
+
+    // 🎥 VIDEO ONLY STREAM (NO AUDIO PLAYBACK)
+    this.videoStream = new MediaStream(
+      this.combinedStream.getVideoTracks()
+    );
+
+    // 🎤 AUDIO ONLY STREAM
+    this.audioStream = new MediaStream(
+      this.combinedStream.getAudioTracks()
+    );
+
+    setTimeout(() => {
+      if (this.videoRef && this.videoStream) {
+        this.videoRef.nativeElement.srcObject = this.videoStream;
+        this.videoRef.nativeElement.muted = true; // 🔥 extra safety
+      }
+    }, 100);
+  }
+
+  // ================= VIDEO RECORDING =================
+  startVideoRecording() {
+
+    if (!this.combinedStream) return;
+
+    this.videoRecorder = new MediaRecorder(this.combinedStream, {
+      mimeType: 'video/webm;codecs=vp8',
+      videoBitsPerSecond: 500000
+    });
+
+    this.videoRecorder.ondataavailable = (event: any) => {
+      if (event.data.size > 0) {
+        this.fullVideo.push(event.data);
+      }
+    };
+
+    this.videoRecorder.start(5000);
+  }
+
+  // ================= AUDIO LOOP =================
+  startAudioLoop() {
+
+    if (this.audioLoopRunning || !this.audioStream) return;
+
+    this.audioLoopRunning = true;
+
+    const recordChunk = () => {
+
+      // 🔥 STOP if speaking (TTS)
+      if (!this.audioLoopRunning || this.interviewCompleted) {
+  return;
+}
+
+if (this.isSpeaking) {
+  setTimeout(recordChunk, 500); // retry instead of blocking
+  return;
+}
+
+      this.audioRecorder = new MediaRecorder(this.audioStream!, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
+
+      let chunks: Blob[] = [];
+
+      this.audioRecorder.ondataavailable = (event: any) => {
+        if (event.data && event.data.size > 1000) {
+          chunks.push(event.data);
+        }
+      };
+
+      this.audioRecorder.onstop = () => {
+
+        if (this.isSpeaking) return; // 🔥 double safety
+
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+
+        if (blob.size > 2000) {
+          this.uploadQueue.push(blob);
+          this.processQueue();
+        }
+
+        setTimeout(recordChunk, 300);
+      };
+
+      this.audioRecorder.start();
+
+      setTimeout(() => {
+        if (this.audioRecorder?.state === 'recording') {
+          this.audioRecorder.requestData();
+        }
+      }, 7000);
+
+      setTimeout(() => {
+        if (this.audioRecorder?.state !== 'inactive') {
+          this.audioRecorder.stop();
+        }
+      }, 8000);
+    };
+
+    recordChunk();
+  }
+
+  // ================= PROCESS QUEUE =================
+  processQueue() {
+
+    if (this.processingQueue || this.uploadQueue.length === 0) return;
+
+    const blob = this.uploadQueue.shift()!;
+    this.processingQueue = true;
+
+    const formData = new FormData();
+    formData.append('file', blob, 'audio.webm');
+
+    this.http.post<any>('http://127.0.0.1:8000/speech-to-text', formData)
       .subscribe({
         next: (res) => {
-          console.log('✅ Question received:', res);
-          this.currentQuestion = res;
-          this.answer = '';
+
+          if (res.text && res.text.trim()) {
+
+            this.silenceCounter = 0;
+
+            if (!this.answer.toLowerCase().includes(res.text.toLowerCase())) {
+
+              if (this.answer.length > 500) {
+                this.answer = this.answer.slice(-300);
+              }
+
+              this.answer += ' ' + res.text;
+            }
+
+          } else {
+            this.silenceCounter += 8;
+          }
+
+          this.processingQueue = false;
+          setTimeout(() => this.processQueue(), 500);
         },
-        error: (err) => {
-          console.error('❌ Error fetching question:', err);
+        error: () => {
+          console.error("❌ STT failed");
+          this.processingQueue = false;
+          setTimeout(() => this.processQueue(), 500);
         }
       });
   }
 
-  nextQuestion() {
-    this.stopMonitoring();
-    this.loadRandomQuestion();
+  // ================= QUESTIONS =================
+  loadNextQuestion() {
+
+  this.http.get<any>(`http://127.0.0.1:8000/next-question/${this.interviewId}`)
+    .subscribe(res => {
+
+      if (res.message === 'Interview completed') {
+        this.finishInterview();
+        return;
+      }
+
+      this.currentQuestion = res;
+      this.answer = '';
+
+      this.questionStartTime = Date.now();
+
+      setTimeout(() => {
+        this.speakQuestion(this.currentQuestion.question_text);
+
+        // 🔥 ENSURE STT resumes after speaking
+        setTimeout(() => {
+          if (!this.audioLoopRunning && !this.interviewCompleted) {
+            console.warn("🔁 Restarting STT loop after question");
+            this.startAudioLoop();
+          }
+        }, 2000);
+
+      }, 500);
+    });
+}
+
+  handleNextQuestion() {
+    this.questionEndTime = Date.now();
+    this.saveAnswer();
+    this.loadNextQuestion();
     this.resetTimer();
   }
 
-  // ---------------- TIMER ----------------
+  // ================= SAVE =================
+  saveAnswer() {
+
+    const payload = {
+      candidate_id: this.interviewDetails?.candidate_id,
+      panel_id: this.interviewDetails?.panel_id,
+      interview_id: this.interviewDetails?.id,
+      question_id: this.currentQuestion?.id,
+      answer_text: this.answer.trim(),
+      time_taken: 40 - this.timeLeft,
+      start_time: this.questionStartTime,
+      end_time: this.questionEndTime
+    };
+
+    this.http.post('http://127.0.0.1:8000/answers', payload).subscribe();
+  }
+
+  // ================= TIMER =================
   startTimer() {
     this.interval = setInterval(() => {
-      if (this.timeLeft > 0) {
-        this.timeLeft--;
-      } else {
-        console.warn('⏰ Time up! Auto moving...');
-        this.nextQuestion();
-      }
+      if (this.timeLeft > 0) this.timeLeft--;
+      else this.handleNextQuestion();
     }, 1000);
   }
 
   resetTimer() {
     clearInterval(this.interval);
-    this.timeLeft = 120;
+    this.timeLeft = 40;
     this.startTimer();
   }
 
@@ -79,161 +311,106 @@ export class ExamComponent implements OnInit {
     return `${min}:${sec < 10 ? '0' : ''}${sec}`;
   }
 
-  // ---------------- START MONITORING ----------------
-  startMonitoring() {
+  // ================= FINISH =================
+  finishInterview() {
 
-    console.log('🎥 Starting monitoring with recording...');
+    this.interviewCompleted = true;
+    this.audioLoopRunning = false;
 
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then(stream => {
+    if (this.videoRecorder) this.videoRecorder.stop();
 
-        this.stream = stream;
-        this.videoRef.nativeElement.srcObject = stream;
+    if (this.combinedStream) {
+      this.combinedStream.getTracks().forEach(track => track.stop());
+    }
 
-        // 🎬 RECORDING START
-        this.mediaRecorder = new MediaRecorder(stream);
-        this.recordedChunks = [];
-
-        this.mediaRecorder.ondataavailable = (event: any) => {
-          if (event.data.size > 0) {
-            this.recordedChunks.push(event.data);
-          }
-        };
-
-        this.mediaRecorder.onstop = () => {
-          console.log('🛑 Recording stopped');
-
-          const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
-          console.log('📦 Video size:', blob.size);
-
-          this.uploadVideo(blob);
-        };
-
-        this.mediaRecorder.start();
-        console.log('▶️ Recording started');
-
-        // Face detection interval
-        this.captureInterval = setInterval(() => {
-          this.captureFrame();
-        }, 2000);
-      });
+    this.uploadFinalVideo();
+    alert('🎉 Interview Completed!');
   }
 
-  // ---------------- STOP MONITORING ----------------
-  stopMonitoring() {
+  // ================= UPLOAD =================
+  uploadFinalVideo() {
 
-    console.log('🛑 Stopping monitoring...');
-
-    // Stop recording
-    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-      this.mediaRecorder.stop();
-      console.log('🎬 MediaRecorder stopped');
-    }
-
-    // Stop capture interval
-    if (this.captureInterval) {
-      clearInterval(this.captureInterval);
-      this.captureInterval = null;
-      console.log('⏹️ Capture interval stopped');
-    }
-
-    // Stop camera
-    if (this.stream) {
-      this.stream.getTracks().forEach(track => track.stop());
-      this.stream = null;
-      console.log('📷 Camera stopped');
-    }
-
-    // Clear video
-    if (this.videoRef && this.videoRef.nativeElement) {
-      this.videoRef.nativeElement.srcObject = null;
-    }
-
-    console.log('✅ Monitoring stopped');
-  }
-
-  // ---------------- FACE DETECTION ----------------
-  captureFrame() {
-    const video = this.videoRef.nativeElement;
-
-    if (!video.videoWidth || !video.videoHeight) {
-      console.warn('⚠️ Video not ready');
-      return;
-    }
-
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const ctx = canvas.getContext('2d');
-    ctx?.drawImage(video, 0, 0);
-
-    canvas.toBlob(blob => {
-      if (!blob) return;
-
-      const formData = new FormData();
-      formData.append('file', blob, 'frame.jpg');
-
-      this.http.post<any>('http://127.0.0.1:8000/detect-face', formData)
-        .subscribe({
-          next: (res) => {
-            console.log('👤 Faces:', res.faces);
-
-            if (res.faces === 0) {
-              console.warn('❌ No face');
-            } else if (res.faces > 1) {
-              console.warn('❌ Multiple faces');
-            } else {
-              console.log('✅ Normal');
-            }
-          },
-          error: (err) => {
-            console.error('❌ Face API error:', err);
-          }
-        });
-
-    }, 'image/jpeg');
-  }
-
-  // ---------------- UPLOAD VIDEO ----------------
-  uploadVideo(blob: Blob) {
-
-    console.log('🚀 Uploading video...');
+    const finalBlob = new Blob(this.fullVideo, { type: 'video/webm' });
 
     const formData = new FormData();
-    formData.append('file', blob, 'recording.webm');
+    formData.append('file', finalBlob, 'final.webm');
 
-    this.http.post<any>('http://127.0.0.1:8000/speech-to-text', formData)
-      .subscribe({
-        next: (res) => {
-          console.log('🧠 Whisper text:', res.text);
-
-          this.answer = res.text;
-
-          this.saveAnswer(res.text);
-        },
-        error: (err) => {
-          console.error('❌ Upload error:', err);
-        }
-      });
+    this.http.post(`http://127.0.0.1:8000/save-video/${this.interviewId}`, formData)
+      .subscribe();
   }
 
-  // ---------------- SAVE ANSWER ----------------
-  saveAnswer(text: string) {
+  // ================= TTS =================
+  speakQuestion(text: string) {
 
-    const payload = {
-      candidate_id: 'CAND001',
-      question_id: this.currentQuestion?.id,
-      answer_text: text,
-      time_taken: 120 - this.timeLeft
-    };
+  this.isSpeaking = true;
 
-    console.log('💾 Saving answer:', payload);
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = 'en-US';
 
-    this.http.post('http://127.0.0.1:8000/answers', payload)
-      .subscribe({
-        next: () => console.log('✅ Saved'),
-        error: (err) => console.error('❌ Save error:', err)
-      });
+  speech.onend = () => {
+
+    console.log("🗣 TTS finished");
+
+    setTimeout(() => {
+      this.isSpeaking = false;
+
+      // 🔥 FORCE restart STT loop if stuck
+      if (!this.audioLoopRunning && !this.interviewCompleted) {
+        console.warn("🔁 Restarting STT after TTS");
+        this.startAudioLoop();
+      }
+
+    }, 500);
+  };
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(speech);
+}
+
+  startFaceDetection() {
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    this.faceCheckInterval = setInterval(() => {
+
+      if (!this.videoRef?.nativeElement) return;
+
+      const video = this.videoRef.nativeElement;
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      ctx!.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob((blob) => {
+
+        if (!blob) return;
+
+        const formData = new FormData();
+        formData.append('file', blob, 'frame.jpg');
+
+        this.http.post<any>('http://127.0.0.1:8000/detect-face', formData)
+          .subscribe(res => {
+
+            const faces = res.faces;
+
+            // 🟢 CASES
+            if (faces === 0) {
+              alert("⚠ No face detected");
+            }
+
+            if (faces > 1) {
+              alert("🚨 Multiple faces detected!");
+
+              // later you can enable alert:
+              // alert("Multiple faces detected!");
+            }
+
+          });
+
+      }, 'image/jpeg');
+
+    }, 3000); // every 3 seconds
   }
-} 
+}

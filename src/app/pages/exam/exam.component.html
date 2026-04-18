@@ -2,37 +2,101 @@
 
   <!-- HEADER -->
   <div class="header">
-    <h2>Online Exam System</h2>
+    <h2>AI Online Interview System</h2>
   </div>
 
-  <!-- CONTENT -->
-  <div class="content">
+  <!-- 🔥 START INTERVIEW -->
+  <div class="start-section" *ngIf="!interviewId">
+    <button (click)="startInterview()">
+      ▶ Start Interview
+    </button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="content" *ngIf="interviewId && !interviewCompleted">
 
     <!-- LEFT SIDE: VIDEO -->
     <div class="video-section">
+
+      <h3>Live Monitoring</h3>
+
+      <!-- Video Preview -->
       <video #video autoplay muted></video>
 
-      <div class="btn-group">
-        <button (click)="startMonitoring()">Start Camera</button>
-        <button (click)="stopMonitoring()">Stop Camera</button>
-      </div>
+      <!-- Recording Indicator -->
+      <p *ngIf="videoStream && audioStream" style="color: red;">
+        🔴 Audio & Video Recording...
+      </p>
+
+      <!-- Info -->
+      <p style="font-size: 12px; color: gray;">
+        Camera is recording continuously for proctoring.
+      </p>
+
     </div>
 
-    <!-- RIGHT SIDE: QUESTIONS -->
+    <!-- RIGHT SIDE: QUESTION -->
     <div class="question-section">
 
       <h3>Question</h3>
-      <p>{{ currentQuestion?.question_text }}</p>
 
-      <h4>Time Left: {{ formattedTime }}</h4>
+      <!-- Question Text -->
+      <p *ngIf="currentQuestion; else loading">
+        {{ currentQuestion?.question_text }}
+      </p>
 
-      <textarea [(ngModel)]="answer" rows="6" placeholder="Your answer will appear here..."></textarea>
+      <!-- 🔊 Replay -->
+      <button 
+        *ngIf="currentQuestion"
+        (click)="speakQuestion(currentQuestion?.question_text)"
+        class="replay-btn">
+        🔊 Replay Question
+      </button>
 
-      <div class="btn-group">
-        <button (click)="nextQuestion()">Next Question</button>
+      <!-- Loading -->
+      <ng-template #loading>
+        <p>⏳ Loading question...</p>
+      </ng-template>
+
+      <!-- Timer -->
+      <h4>⏱ Time Left: {{ formattedTime }}</h4>
+
+      <!-- Warning -->
+      <p *ngIf="timeLeft <= 10" style="color: red;">
+        ⚠ Last 10 seconds!
+      </p>
+
+      <!-- Answer Box -->
+      <textarea 
+        [(ngModel)]="answer"
+        rows="6"
+        placeholder="Your spoken answer will appear here..."
+        readonly>
+      </textarea>
+
+      <!-- Info -->
+      <p style="color: orange; margin-top: 10px;">
+        🎤 Speak clearly. Your audio is being recorded continuously.
+      </p>
+
+      <!-- ACTIONS -->
+      <div class="btn-group" style="margin-top: 15px;">
+
+        <!-- <button (click)="handleNextQuestion()" [disabled]="!currentQuestion">
+          ➡ Next Question
+        </button> -->
+
       </div>
 
     </div>
+
+  </div>
+
+  <!-- COMPLETION SCREEN -->
+  <div class="completion" *ngIf="interviewCompleted">
+
+    <h2>🎉 Interview Completed</h2>
+    <p>Your responses have been recorded successfully.</p>
 
   </div>
 

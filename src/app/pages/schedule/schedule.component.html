@@ -1,0 +1,723 @@
+<!-- schedule.component.html -->
+<div class="app-shell">
+
+  <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="36" height="36" rx="10" fill="#4f46e5"/>
+          <path d="M10 18h16M18 10v16" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="18" cy="18" r="5" stroke="#fff" stroke-width="2"/>
+        </svg>
+      </div>
+      <span class="brand-name">InterviewIQ</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">MAIN</div>
+      <a class="nav-item active" href="#">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Schedule Interview
+      </a>
+      <a class="nav-item" href="#" (click)="$event.preventDefault(); openAllInterviews()">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        All Interviews
+      </a>
+      <a class="nav-item" href="http://localhost:4200/CommitteeDashboard">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Committee
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">A</div>
+        <div class="user-info">
+          <span class="user-name">Admin</span>
+          <span class="user-role">Coordinator</span>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" class="logout-icon">
+          <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════ MAIN AREA ═══════════════════ -->
+  <main class="main-content">
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- ALL INTERVIEWS VIEW -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <ng-container *ngIf="showAllInterviews">
+
+      <!-- TOP BAR -->
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">All Interviews</h1>
+          <span class="breadcrumb">Dashboard / All Interviews</span>
+        </div>
+        <div class="topbar-right">
+          <button class="btn-secondary" style="display:flex;align-items:center;gap:6px;" (click)="closeAllInterviews()">
+            <svg viewBox="0 0 24 24" fill="none" width="16" height="16" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Back to Schedule
+          </button>
+          <button class="btn-primary" style="margin-left:10px;display:flex;align-items:center;gap:6px;" (click)="loadAllInterviews()">
+            <svg viewBox="0 0 24 24" fill="none" width="16" height="16" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- LOADING -->
+      <div *ngIf="interviewsLoading" style="display:flex;align-items:center;justify-content:center;padding:80px;flex-direction:column;gap:16px;">
+        <div style="width:40px;height:40px;border:3px solid #e5e7eb;border-top-color:#4f46e5;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+        <p style="color:#6b7280;font-size:14px;">Loading interviews...</p>
+      </div>
+
+      <!-- ERROR -->
+      <div *ngIf="interviewsError && !interviewsLoading" style="margin:24px;padding:16px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;color:#dc2626;font-size:14px;">
+        ❌ {{ interviewsError }}
+      </div>
+
+      <!-- TABLE -->
+      <div class="form-scroll" *ngIf="!interviewsLoading && !interviewsError">
+
+        <!-- Stats Row -->
+        <div style="display:flex;gap:16px;margin-bottom:20px;">
+          <div style="flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:12px;">
+            <div style="width:40px;height:40px;background:#ede9fe;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+              <svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke="#7c3aed" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div style="font-size:22px;font-weight:700;color:#111827;">{{ allInterviews.length }}</div>
+              <div style="font-size:12px;color:#6b7280;">Total Interviews</div>
+            </div>
+          </div>
+          <div style="flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:12px;">
+            <div style="width:40px;height:40px;background:#dbeafe;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+              <svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke="#2563eb" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div style="font-size:22px;font-weight:700;color:#111827;">{{ allInterviews.length }}</div>
+              <div style="font-size:12px;color:#6b7280;">Scheduled</div>
+            </div>
+          </div>
+          <div style="flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:12px;">
+            <div style="width:40px;height:40px;background:#dcfce7;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+              <svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke="#16a34a" stroke-width="1.8"><path d="M9 11l3 3L22 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div style="font-size:22px;font-weight:700;color:#111827;">0</div>
+              <div style="font-size:12px;color:#6b7280;">Completed</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="padding:20px 24px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <h3 class="card-title" style="margin:0;">Interview Records</h3>
+              <p class="card-sub" style="margin:2px 0 0;">All scheduled interviews from the system</p>
+            </div>
+            <span style="background:#f3f4f6;color:#374151;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;">
+              {{ allInterviews.length }} records
+            </span>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="allInterviews.length === 0" style="padding:60px;text-align:center;">
+            <svg viewBox="0 0 24 24" fill="none" width="48" height="48" style="margin:0 auto 16px;display:block;" stroke="#d1d5db" stroke-width="1.2">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-linecap="round"/>
+            </svg>
+            <p style="color:#9ca3af;font-size:15px;margin:0;">No interviews found</p>
+            <p style="color:#d1d5db;font-size:13px;margin:6px 0 0;">Schedule your first interview to see it here.</p>
+          </div>
+
+          <!-- Table -->
+          <div *ngIf="allInterviews.length > 0" style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:13.5px;">
+              <thead>
+                <tr style="background:#f9fafb;border-bottom:1px solid #f3f4f6;">
+                  <th style="padding:12px 16px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">#</th>
+                  <th style="padding:12px 16px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Interview ID</th>
+                  <th style="padding:12px 16px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Candidate</th>
+                  <th style="padding:12px 16px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Contact</th>
+                  <th style="padding:12px 16px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Panel</th>
+                  <th style="padding:12px 16px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Scheduled At</th>
+                  <th style="padding:12px 16px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Status</th>
+                  <th style="padding:12px 16px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let iv of allInterviews; let i = index"
+                    style="border-bottom:1px solid #f3f4f6;transition:background 0.15s;"
+                    onmouseover="this.style.background='#fafafa'"
+                    onmouseout="this.style.background=''"
+                >
+                  <!-- # -->
+                  <td style="padding:14px 16px;color:#9ca3af;font-weight:500;">{{ i + 1 }}</td>
+
+                  <!-- Interview ID -->
+                  <td style="padding:14px 16px;">
+                    <span style="background:#ede9fe;color:#6d28d9;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;">
+                      {{ iv.interview_id }}
+                    </span>
+                  </td>
+
+                  <!-- Candidate -->
+                  <td style="padding:14px 16px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;">
+                        {{ iv.candidate_name?.charAt(0) || '?' }}
+                      </div>
+                      <div>
+                        <div style="font-weight:600;color:#111827;">{{ iv.candidate_name || '—' }}</div>
+                        <div style="font-size:12px;color:#6b7280;">{{ iv.email || '—' }}</div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Contact -->
+                  <td style="padding:14px 16px;color:#374151;">
+                    {{ iv.phone || '—' }}
+                  </td>
+
+                  <!-- Panel -->
+                  <td style="padding:14px 16px;">
+                    <span style="background:#e0f2fe;color:#0369a1;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;">
+                      {{ iv.panel_name || '—' }}
+                    </span>
+                  </td>
+
+                  <!-- Scheduled At -->
+                  <!-- Scheduled At -->
+                <td style="padding:14px 16px;color:#374151;white-space:nowrap;">
+                  <div style="font-weight:500;">{{ formatScheduledAt(iv.scheduled_at).date }}</div>
+                  <div style="font-size:12px;color:#9ca3af;">{{ formatScheduledAt(iv.scheduled_at).time }}</div>
+                </td>
+
+                  <!-- Status -->
+                  <td style="padding:14px 16px;">
+                    <span [ngClass]="getStatusClass(iv.status)"
+                          style="font-size:12px;font-weight:600;padding:3px 12px;border-radius:20px;white-space:nowrap;">
+                      {{ iv.status }}
+                    </span>
+                  </td>
+
+                  <!-- Actions -->
+                  <td style="padding:14px 16px;">
+                    <div style="display:flex;gap:8px;align-items:center;">
+                      <button
+                        title="Delete"
+                        (click)="confirmDeleteInterview(iv.interview_id)"
+                        style="width:30px;height:30px;border:1px solid #fecaca;background:#fff;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#ef4444;transition:all 0.15s;"
+                        onmouseover="this.style.background='#fef2f2'"
+                        onmouseout="this.style.background='#fff'">
+                        <svg viewBox="0 0 24 24" fill="none" width="14" height="14" stroke="currentColor" stroke-width="2">
+                          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11v6M14 11v6" stroke-linecap="round"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /form-scroll -->
+    </ng-container>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- SCHEDULE FORM (hidden when showAllInterviews is true) -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <ng-container *ngIf="!showAllInterviews">
+
+      <!-- TOP BAR -->
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">Schedule Interview</h1>
+          <span class="breadcrumb">Dashboard / Schedule Interview / New</span>
+        </div>
+        <div class="topbar-right">
+          <div class="step-badge" *ngIf="currentStep <= 3">Step {{ currentStep }} of 3</div>
+        </div>
+      </div>
+
+      <!-- PROGRESS STEPS -->
+      <div class="progress-steps" *ngIf="currentStep <= 3">
+        <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1" (click)="goToStep(1)" style="cursor:pointer;">
+          <div class="step-circle">
+            <span *ngIf="currentStep <= 1">1</span>
+            <svg *ngIf="currentStep > 1" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span>Basic Setup</span>
+        </div>
+        <div class="step-line" [class.filled]="currentStep > 1"></div>
+        <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2" (click)="goToStep(2)" style="cursor:pointer;">
+          <div class="step-circle">
+            <span *ngIf="currentStep <= 2">2</span>
+            <svg *ngIf="currentStep > 2" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span>Student Details</span>
+        </div>
+        <div class="step-line" [class.filled]="currentStep > 2"></div>
+        <div class="step" [class.active]="currentStep === 3" (click)="goToStep(3)" style="cursor:pointer;">
+          <div class="step-circle">3</div>
+          <span>Documents &amp; Submit</span>
+        </div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div class="form-scroll" *ngIf="currentStep === 1">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon purple">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div>
+              <h3 class="card-title">Interview Category</h3>
+              <p class="card-sub">Start by selecting the academic program</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="form-group" style="max-width:340px;">
+              <label class="form-label">Interview Category <span class="req">*</span></label>
+              <select class="form-select" [(ngModel)]="appliedRole" name="role">
+                <option value="" disabled selected>-- Select Role --</option>
+                <option value="IT">IT</option>
+                <option value="Operations">Operations</option>
+                <option value="Management">Management</option>
+                <option value="HR">HR</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon blue">
+              <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <h3 class="card-title">Interview Details</h3>
+              <p class="card-sub">Set date, time and details for the interview</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Interview Date <span class="req">*</span></label>
+                <input type="date" class="form-input" [(ngModel)]="interviewDate" name="date"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Start Time <span class="req">*</span></label>
+                <input type="time" class="form-input" [(ngModel)]="startTime" name="start"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">End Time <span class="req">*</span></label>
+                <input type="time" class="form-input" [(ngModel)]="endTime" name="end"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon orange">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <h3 class="card-title">Interview Committee</h3>
+              <p class="card-sub">Select multiple members and assign a chairman</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Panel Type <span class="req">*</span></label>
+              <div style="display:flex; gap:12px; margin-top:6px;">
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                  <input type="radio" name="panelMode" value="new" [(ngModel)]="panelMode"/> Internal Member
+                </label>
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                  <input type="radio" name="panelMode" value="existing" [(ngModel)]="panelMode"/> External Member
+                </label>
+              </div>
+            </div>
+
+            <div *ngIf="panelMode === 'existing'" class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Select Panel <span class="req">*</span></label>
+              <select class="form-select" [(ngModel)]="selectedPanelId" name="existingPanel">
+                <option [value]="null" disabled selected>-- Select Existing Panel --</option>
+                <option *ngFor="let p of existingPanels" [value]="p.id">{{ p.panel_name }} ({{ p.member_count }} members)</option>
+              </select>
+            </div>
+
+            <ng-container *ngIf="panelMode === 'new'">
+              <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label">Panel Name <span class="req" style="color:#999; font-size:11px;">(optional)</span></label>
+                <input type="text" class="form-input" placeholder="e.g. Tech Panel 2025" [(ngModel)]="newPanelName" name="panelName"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Add Members <span class="req">*</span></label>
+                <select class="form-select" (change)="addMember($event)">
+                  <option value="" disabled selected>-- Select Member to Add --</option>
+                  <option *ngFor="let m of availableMembers" [value]="m.id" [disabled]="isMemberSelected(m.id)">{{ m.name }} — {{ m.designation }}</option>
+                </select>
+              </div>
+              <div *ngIf="selectedMembers.length > 0" style="margin-top:8px; margin-bottom:12px; padding:8px 12px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; font-size:13px; color:#166534;">
+                ✓ Chairman: <strong>{{ getChairmanName() }}</strong> &nbsp;·&nbsp; Click "Make Chairman" to change
+              </div>
+              <div class="members-list" *ngIf="selectedMembers.length > 0">
+                <div class="member-card" *ngFor="let m of selectedMembers" [class.chairman]="chairmanUserId === m.id">
+                  <div class="member-left">
+                    <div class="member-avatar" [class.chair-avatar]="chairmanUserId === m.id">
+                      {{ m.name.charAt(0) }}
+                      <span class="crown" *ngIf="chairmanUserId === m.id">♛</span>
+                    </div>
+                    <div class="member-details">
+                      <div class="member-name">{{ m.name }}</div>
+                      <div class="member-meta">{{ m.designation }}</div>
+                    </div>
+                  </div>
+                  <div class="member-right">
+                    <div class="member-actions">
+                      <button class="btn-chair" [class.active]="chairmanUserId === m.id" (click)="setChairman(m.id)">
+                        <span *ngIf="chairmanUserId !== m.id">Make Chairman</span>
+                        <span *ngIf="chairmanUserId === m.id">✓ Chairman</span>
+                      </button>
+                      <button class="btn-remove" (click)="removeMember(m.id)">✕</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="empty-members" *ngIf="selectedMembers.length === 0">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="#ccc" stroke-width="1.5"/><circle cx="9" cy="7" r="4" stroke="#ccc" stroke-width="1.5"/></svg>
+                <p>No committee members added yet</p>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <div *ngIf="!canProceedStep1()" style="margin: 0 0 12px; padding:10px 16px; background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; font-size:13px; color:#9a3412;">
+          ⚠️ Please fill:
+          <span *ngIf="!appliedRole"> Applied Role,</span>
+          <span *ngIf="!interviewDate"> Interview Date,</span>
+          <span *ngIf="!startTime"> Start Time,</span>
+          <span *ngIf="!endTime"> End Time,</span>
+          <span *ngIf="panelMode === 'new' && selectedMembers.length === 0"> At least 1 committee member</span>
+          <span *ngIf="panelMode === 'existing' && !selectedPanelId"> Select a panel</span>
+        </div>
+
+        <div class="card summary-card" *ngIf="canProceedStep1()">
+          <div class="card-header">
+            <div class="card-icon teal">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <h3 class="card-title">✅ Review Summary</h3>
+              <p class="card-sub">All required fields filled — ready to proceed!</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="summary-grid">
+              <div class="summary-item"><span class="summary-label">Applied Role</span><span class="summary-val">{{ appliedRole }}</span></div>
+              <div class="summary-item"><span class="summary-label">Date &amp; Time</span><span class="summary-val">{{ interviewDate }} · {{ startTime }} – {{ endTime }}</span></div>
+              <div class="summary-item"><span class="summary-label">Committee</span><span class="summary-val">{{ selectedMembers.length }} member(s)</span></div>
+              <div class="summary-item"><span class="summary-label">Chairman</span><span class="summary-val chairman-val">{{ getChairmanName() }}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button class="btn-secondary">Cancel</button>
+          <button class="btn-primary" [disabled]="!canProceedStep1()" (click)="nextStep()">
+            Next: Student Details
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="form-scroll" *ngIf="currentStep === 2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon purple">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <h3 class="card-title">👤 Basic Information</h3>
+              <p class="card-sub">Personal details of the candidate</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="photo-upload-row">
+              <div class="photo-preview" *ngIf="studentPhotoPreview">
+                <img [src]="studentPhotoPreview" alt="Student Photo"/>
+              </div>
+              <div class="photo-placeholder" *ngIf="!studentPhotoPreview">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#aab0bb" stroke-width="1.5"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#aab0bb" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span>No Photo</span>
+              </div>
+              <div class="photo-upload-btn-wrap">
+                <label class="form-label">Photograph</label>
+                <label class="btn-upload-photo">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  Upload Photo
+                  <input type="file" accept="image/*" style="display:none;" (change)="onPhotoUpload($event)"/>
+                </label>
+                <span class="upload-hint">JPG, PNG – max 2MB</span>
+              </div>
+            </div>
+            <div class="form-grid" style="margin-top:18px;">
+              <div class="form-group">
+                <label class="form-label">Full Name <span class="req">*</span></label>
+                <input type="text" class="form-input" placeholder="e.g. Rahul Sharma" [(ngModel)]="studentFullName" name="sfn"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Father's / Mother's Name</label>
+                <input type="text" class="form-input" placeholder="e.g. Suresh Sharma" [(ngModel)]="studentFatherMotherName" name="sfmn"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Date of Birth</label>
+                <input type="date" class="form-input" [(ngModel)]="studentDOB" name="sdob" [max]="maxDOB"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Gender</label>
+                <select class="form-select" [(ngModel)]="studentGender" name="sgender">
+                  <option value="" disabled selected>-- Select --</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-select" [(ngModel)]="studentCategory" name="scat">
+                  <option value="" disabled selected>-- Select --</option>
+                  <option value="general">General</option>
+                  <option value="obc">OBC</option>
+                  <option value="sc">SC</option>
+                  <option value="st">ST</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon blue"><svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.61 19a19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 3.12 4.18 2 2 0 0 1 5.09 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L9.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div><h3 class="card-title">📞 Contact Information</h3><p class="card-sub">How to reach the candidate</p></div>
+          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="form-group"><label class="form-label">Mobile Number</label><input type="tel" class="form-input" placeholder="10-digit mobile" [(ngModel)]="studentMobile" name="smob"/></div>
+              <div class="form-group"><label class="form-label">Alternate Contact</label><input type="tel" class="form-input" placeholder="Optional" [(ngModel)]="studentAltMobile" name="saltmob"/></div>
+              <div class="form-group"><label class="form-label">Email ID</label><input type="email" class="form-input" placeholder="student@college.edu" [(ngModel)]="studentEmail" name="semail"/></div>
+            </div>
+            <div class="form-grid" style="margin-top:14px; grid-template-columns: 1fr 1fr;">
+              <div class="form-group"><label class="form-label">Current Address</label><textarea class="form-input form-textarea" placeholder="Flat No, Street, City, State - PIN" [(ngModel)]="studentCurrentAddress" name="scaddr" rows="3"></textarea></div>
+              <div class="form-group"><label class="form-label">Permanent Address</label><textarea class="form-input form-textarea" placeholder="Flat No, Street, City, State - PIN" [(ngModel)]="studentPermanentAddress" name="spaddr" rows="3"></textarea></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon green"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div><h3 class="card-title">🎓 Academic Details</h3><p class="card-sub">Educational background and enrollment info</p></div>
+          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="form-group"><label class="form-label">Course / Program</label><input type="text" class="form-input" placeholder="e.g. B.Tech" [(ngModel)]="studentCourseProg" name="scp"/></div>
+              <div class="form-group"><label class="form-label">Department / Branch</label><input type="text" class="form-input" placeholder="e.g. Computer Science" [(ngModel)]="studentDeptBranch" name="sdb"/></div>
+              <div class="form-group"><label class="form-label">University / College</label><input type="text" class="form-input" placeholder="e.g. XYZ University" [(ngModel)]="studentUniversity" name="suni"/></div>
+              <div class="form-group"><label class="form-label">Enrollment / Roll No</label><input type="text" class="form-input" placeholder="e.g. CS2101" [(ngModel)]="studentEnrollNo" name="sroll"/></div>
+              <div class="form-group"><label class="form-label">Academic Year / Semester</label><input type="text" class="form-input" placeholder="e.g. 3rd Year / Sem 6" [(ngModel)]="studentAcademicYear" name="syear"/></div>
+              <div class="form-group"><label class="form-label">Percentage / CGPA</label><input type="text" class="form-input" placeholder="e.g. 8.5 CGPA" [(ngModel)]="studentCGPA" name="scgpa"/></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon orange"><svg viewBox="0 0 24 24" fill="none"><polyline points="16 18 22 12 16 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="8 6 2 12 8 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div><h3 class="card-title">💻 Technical / Skill Details</h3><p class="card-sub">Skills, certifications and experience</p></div>
+          </div>
+          <div class="card-body">
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+              <div class="form-group"><label class="form-label">Key Skills</label><textarea class="form-input form-textarea" placeholder="e.g. Python, Java, React..." [(ngModel)]="studentSkills" name="sskills" rows="3"></textarea></div>
+              <div class="form-group"><label class="form-label">Certifications</label><textarea class="form-input form-textarea" placeholder="e.g. AWS Cloud Practitioner..." [(ngModel)]="studentCertifications" name="scert" rows="3"></textarea></div>
+              <div class="form-group"><label class="form-label">Projects</label><textarea class="form-input form-textarea" placeholder="e.g. AI Chatbot – Built using Python..." [(ngModel)]="studentProjects" name="sproj" rows="3"></textarea></div>
+              <div class="form-group"><label class="form-label">Internship / Work Experience</label><textarea class="form-input form-textarea" placeholder="e.g. 3-month internship at TCS..." [(ngModel)]="studentExperience" name="sexp" rows="3"></textarea></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon purple"><svg viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div><h3 class="card-title">📊 Additional Information</h3><p class="card-sub">Strengths, objectives and declaration</p></div>
+          </div>
+          <div class="card-body">
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+              <div class="form-group"><label class="form-label">Strengths</label><textarea class="form-input form-textarea" placeholder="e.g. Problem-solving, Team player..." [(ngModel)]="studentStrengths" name="sstr" rows="3"></textarea></div>
+              <div class="form-group"><label class="form-label">Weaknesses</label><textarea class="form-input form-textarea" placeholder="e.g. Perfectionist..." [(ngModel)]="studentWeaknesses" name="sweak" rows="3"></textarea></div>
+            </div>
+            <div class="form-group" style="margin-top:14px;">
+              <label class="form-label">Career Objective</label>
+              <textarea class="form-input form-textarea" placeholder="Briefly describe your career goal..." [(ngModel)]="studentCareerObjective" name="scobj" rows="3"></textarea>
+            </div>
+            <div class="declaration-box">
+              <label class="declaration-label">
+                <input type="checkbox" [(ngModel)]="studentDeclaration" name="sdecl" class="declaration-check"/>
+                <span>I hereby declare that all the information provided above is true and correct to the best of my knowledge.</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!canProceedStep2()" style="margin: 0 0 12px; padding:10px 16px; background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; font-size:13px; color:#9a3412;">
+          ⚠️ Please fill: <span *ngIf="!studentFullName"> Full Name,</span><span *ngIf="!studentDeclaration"> Accept Declaration</span>
+        </div>
+
+        <div class="form-footer">
+          <button class="btn-secondary" (click)="goToStep(1)">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Back
+          </button>
+          <button class="btn-primary" [disabled]="!canProceedStep2()" (click)="nextStep()">
+            Next: Documents &amp; Submit
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="form-scroll" *ngIf="currentStep === 3">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon blue"><svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div><h3 class="card-title">📎 Documents Upload</h3><p class="card-sub">Upload required documents for the interview</p></div>
+          </div>
+          <div class="card-body">
+            <div class="doc-upload-grid">
+              <div class="doc-upload-card" [class.uploaded]="resumeFile">
+                <div class="doc-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.8"/><polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="1.8"/></svg></div>
+                <div class="doc-info"><div class="doc-title">Resume / CV <span class="req">*</span></div><div class="doc-hint">PDF, DOC – max 5MB</div><div class="doc-filename" *ngIf="resumeFileName">{{ resumeFileName }}</div></div>
+                <label class="btn-doc-upload" [class.done]="resumeFile"><span *ngIf="!resumeFile">Upload</span><span *ngIf="resumeFile">✓ Uploaded</span><input type="file" accept=".pdf,.doc,.docx" style="display:none;" (change)="onFileUpload($event, 'resume')"/></label>
+              </div>
+              <div class="doc-upload-card" [class.uploaded]="idProofFile">
+                <div class="doc-icon orange"><svg viewBox="0 0 24 24" fill="none"><rect x="1" y="4" width="22" height="16" rx="2" ry="2" stroke="currentColor" stroke-width="1.8"/><line x1="1" y1="10" x2="23" y2="10" stroke="currentColor" stroke-width="1.8"/></svg></div>
+                <div class="doc-info"><div class="doc-title">ID Proof <span class="req">*</span></div><div class="doc-hint">Aadhar / College ID</div><div class="doc-filename" *ngIf="idProofFileName">{{ idProofFileName }}</div></div>
+                <label class="btn-doc-upload" [class.done]="idProofFile"><span *ngIf="!idProofFile">Upload</span><span *ngIf="idProofFile">✓ Uploaded</span><input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" (change)="onFileUpload($event, 'idproof')"/></label>
+              </div>
+              <div class="doc-upload-card" [class.uploaded]="certificatesFile">
+                <div class="doc-icon green"><svg viewBox="0 0 24 24" fill="none"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.8"/></svg></div>
+                <div class="doc-info"><div class="doc-title">Academic Certificates</div><div class="doc-hint">Marksheets, Degree – PDF</div><div class="doc-filename" *ngIf="certificatesFileName">{{ certificatesFileName }}</div></div>
+                <label class="btn-doc-upload" [class.done]="certificatesFile"><span *ngIf="!certificatesFile">Upload</span><span *ngIf="certificatesFile">✓ Uploaded</span><input type="file" accept=".pdf" style="display:none;" (change)="onFileUpload($event, 'certificates')"/></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card summary-card">
+          <div class="card-header">
+            <div class="card-icon teal"><svg viewBox="0 0 24 24" fill="none"><path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+            <div><h3 class="card-title">Final Review</h3><p class="card-sub">Everything looks good? Schedule the interview.</p></div>
+          </div>
+          <div class="card-body">
+            <div class="final-review-grid">
+              <div class="review-section">
+                <div class="review-section-title">Interview Info</div>
+                <div class="review-row"><span class="review-label">Interview ID</span><span class="review-val id-badge">{{ generatedInterviewId }}</span></div>
+                <div class="review-row"><span class="review-label">Date</span><span class="review-val">{{ interviewDate }}</span></div>
+                <div class="review-row"><span class="review-label">Time</span><span class="review-val">{{ startTime }} – {{ endTime }}</span></div>
+                <div class="review-row"><span class="review-label">Role</span><span class="review-val">{{ appliedRole }}</span></div>
+              </div>
+              <div class="review-section">
+                <div class="review-section-title">Student</div>
+                <div class="review-row"><span class="review-label">Name</span><span class="review-val">{{ studentFullName || '—' }}</span></div>
+                <div class="review-row"><span class="review-label">Roll No</span><span class="review-val">{{ studentEnrollNo || '—' }}</span></div>
+                <div class="review-row"><span class="review-label">Course</span><span class="review-val">{{ studentCourseProg || '—' }}</span></div>
+                <div class="review-row"><span class="review-label">Mobile</span><span class="review-val">{{ studentMobile || '—' }}</span></div>
+              </div>
+              <div class="review-section">
+                <div class="review-section-title">Committee</div>
+                <div class="review-row"><span class="review-label">Members</span><span class="review-val">{{ selectedMembers.length }}</span></div>
+                <div class="review-row"><span class="review-label">Chairman</span><span class="review-val chairman-val">{{ getChairmanName() }}</span></div>
+                <div class="review-row"><span class="review-label">Resume</span><span class="review-val" [class.doc-ok]="resumeFile" [class.doc-missing]="!resumeFile">{{ resumeFile ? '✓ Uploaded' : '✗ Missing' }}</span></div>
+                <div class="review-row"><span class="review-label">ID Proof</span><span class="review-val" [class.doc-ok]="idProofFile" [class.doc-missing]="!idProofFile">{{ idProofFile ? '✓ Uploaded' : '✗ Missing' }}</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="apiError" style="margin: 0 0 12px; padding:12px 16px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; font-size:13px; color:#dc2626;">
+          ❌ {{ apiError }}
+        </div>
+
+        <div class="form-footer">
+          <button class="btn-secondary" (click)="goToStep(2)">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Back
+          </button>
+          <button class="btn-schedule" [disabled]="!canSchedule() || isLoading" (click)="scheduleInterview()">
+            <svg *ngIf="!isLoading" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 14l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span *ngIf="!isLoading">Schedule Interview</span>
+            <span *ngIf="isLoading">⏳ Scheduling...</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 4: SUCCESS -->
+      <div class="form-scroll" *ngIf="currentStep === 4">
+        <div class="success-screen">
+          <div class="success-icon-wrap">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="40" cy="40" r="40" fill="#dcfce7"/>
+              <circle cx="40" cy="40" r="30" fill="#16a34a"/>
+              <path d="M26 41l10 10 18-18" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h2 class="success-title">Interview Scheduled!</h2>
+          <p class="success-sub">The interview has been successfully scheduled and confirmation has been sent to all parties.</p>
+
+          <div class="success-detail-card">
+            <div class="success-detail-row"><span class="success-detail-label">Interview ID</span><span class="success-detail-val id-badge">{{ generatedInterviewId }}</span></div>
+            <div class="success-detail-row"><span class="success-detail-label">Student</span><span class="success-detail-val">{{ studentFullName || '—' }}</span></div>
+            <div class="success-detail-row"><span class="success-detail-label">Role</span><span class="success-detail-val">{{ appliedRole }}</span></div>
+            <div class="success-detail-row"><span class="success-detail-label">Date &amp; Time</span><span class="success-detail-val">{{ interviewDate }} · {{ startTime }} – {{ endTime }}</span></div>
+            <div class="success-detail-row"><span class="success-detail-label">Chairman</span><span class="success-detail-val chairman-val">{{ getChairmanName() }}</span></div>
+          </div>
+
+          <div class="success-actions">
+            <button class="btn-secondary" style="padding:11px 28px;" (click)="resetForm()">
+              Schedule Another
+            </button>
+            <!-- FIX: Now actually loads and shows all interviews -->
+            <button class="btn-primary" style="padding:11px 28px;" (click)="openAllInterviews()">
+              View All Interviews
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+
+  </main>
+</div>
+
+<!-- Spinner animation -->
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Status badge colors */
+  .status-scheduled  { background: #dbeafe; color: #1d4ed8; }
+  .status-completed  { background: #dcfce7; color: #15803d; }
+  .status-cancelled  { background: #fee2e2; color: #b91c1c; }
+</style>
