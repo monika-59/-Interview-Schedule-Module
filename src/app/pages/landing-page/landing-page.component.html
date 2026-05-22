@@ -1,399 +1,208 @@
-<!-- ══ NAVBAR ══ -->
-<nav id="navbar" [class.scrolled]="isScrolled">
-  <div class="nav-inner">
-    <a href="#home" class="logo" (click)="scrollTo('home')">
-      <div class="logo-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-        </svg>
-      </div>
-      <span class="logo-name">AI Interview</span>
-    </a>
-    <div class="nav-links">
-      <a href="#features" class="nav-link" (click)="$event.preventDefault(); scrollTo('features')">Features</a>
-      <a href="#how" class="nav-link" (click)="$event.preventDefault(); scrollTo('how')">How It Works</a>
-      <button class="nav-btn-outline" (click)="openModal('login')">Login</button>
-      <button class="nav-cta" (click)="openModal('login')">Get Started</button>
-    </div>
-    <button class="hamburger" id="hamburger" (click)="toggleMobile()" aria-label="Menu">
-      <svg viewBox="0 0 24 24" fill="none" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <line x1="3" y1="12" x2="21" y2="12"/>
-        <line x1="3" y1="18" x2="21" y2="18"/>
-      </svg>
-    </button>
-  </div>
-  <!-- FIX 1: Added overflow:hidden + proper hidden state so mobile links don't leak -->
-  <div class="mobile-menu" [class.open]="!mobileMenuHidden" id="mobileMenu">
-    <a href="#features" class="mobile-link" (click)="scrollTo('features'); toggleMobile()">Features</a>
-    <a href="#how" class="mobile-link" (click)="scrollTo('how'); toggleMobile()">How It Works</a>
-    <a href="#" class="mobile-link" (click)="openModal('login'); toggleMobile()">Login</a>
-    <a href="#" class="mobile-link" style="color:var(--accent);font-weight:800;" (click)="openModal('login'); toggleMobile()">Get Started →</a>
-  </div>
-</nav>
+<!-- landing-page.component.html — FULL PAGE, SINGLE BACKGROUND -->
 
-<!-- ══ HERO ══ -->
-<section class="hero" id="home">
-  <div class="hero-canvas-wrap"><canvas id="heroCanvas"></canvas></div>
+<div class="full-page">
+
+  <!-- Background layers -->
+  <canvas id="heroCanvas" class="hero-canvas"></canvas>
   <div class="hero-glow"></div>
   <div class="hero-grid"></div>
   <div class="particles-wrap" id="particles"></div>
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+  <div class="hero-orb orb3"></div>
 
-  <div class="hero-content">
-    <!-- FIX 2: Removed hero-badge entirely -->
-    <h1 class="hero-h1">Transform Interviews<br><em>with Intelligence</em></h1>
-    <p class="hero-sub">Conduct smart, automated interviews with AI-driven analytics, live monitoring, and comprehensive evaluation tools. Save time, improve accuracy, make data-driven decisions.</p>
-    <div class="hero-btns">
-      <a href="#features" class="btn-grad" (click)="$event.preventDefault(); scrollTo('features')">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Start Interview
-      </a>
-      <a href="#how" class="btn-ghost" (click)="$event.preventDefault(); scrollTo('how')">
-        <svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
+  <!-- Navbar -->
+  <nav class="hero-nav" [class.scrolled]="isScrolled">
+    <a class="logo" href="#">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
         </svg>
-        See How It Works
-      </a>
-    </div>
-  </div>
+      </div>
+      <span class="logo-name">Interview</span>
+    </a>
+  </nav>
 
-  <div class="stats-strip" id="stats-strip">
-    <div class="stats-inner">
-      <div class="stat-cell"><span class="stat-val" id="s1">0</span><span class="stat-lbl">Interviews Conducted</span></div>
-      <div class="stat-cell"><span class="stat-val" id="s2">0</span><span class="stat-lbl">Time Saved</span></div>
-      <div class="stat-cell"><span class="stat-val" id="s3">0</span><span class="stat-lbl">Institutions</span></div>
-      <div class="stat-cell"><span class="stat-val" id="s4">4.9/5</span><span class="stat-lbl">User Rating</span></div>
-    </div>
-  </div>
-</section>
+  <!-- Main body: Left text + Right card -->
+  <div class="page-body">
 
-<!-- ══ FEATURES ══ -->
-<section id="features" class="section features-section">
-  <div class="wrap">
-    <div class="s-center reveal">
-      <span class="section-tag tag-violet">Core Features</span>
-      <h2 class="section-h">Everything You Need for<br>Modern Interviews</h2>
-      <p class="section-p">Powerful AI-driven tools designed to streamline your entire interview process end-to-end.</p>
-    </div>
-    <div class="feat-grid">
-      <div class="feat-card fc-violet reveal delay-1">
-        <div class="feat-icon" style="background:rgba(91,33,182,.12)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#5b21b6" stroke-width="2" stroke-linecap="round">
-            <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-5 0v-1.5"/>
-            <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5"/>
-            <path d="M17 6.5A2.5 2.5 0 0 1 19.5 9a2.5 2.5 0 0 1-2.5 2.5"/>
-            <path d="M7 6.5A2.5 2.5 0 0 0 4.5 9 2.5 2.5 0 0 0 7 11.5"/>
-            <path d="M17 11.5a2.5 2.5 0 0 1 0 5"/>
-            <path d="M7 11.5a2.5 2.5 0 0 0 0 5"/>
-          </svg>
-        </div>
-        <h3 class="feat-title">AI-Powered Analysis</h3>
-        <p class="feat-desc">Advanced AI evaluates speech, emotions, confidence, and body language in real-time with unmatched precision.</p>
-        <div class="feat-shine" style="background:linear-gradient(90deg,transparent,#7c3aed,transparent)"></div>
-      </div>
-      <div class="feat-card fc-blue reveal delay-2">
-        <div class="feat-icon" style="background:rgba(37,99,235,.1)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round">
-            <rect x="2" y="7" width="15" height="11" rx="2"/>
-            <path d="M17 9.5l5-3v11l-5-3V9.5z" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <h3 class="feat-title">Live Monitoring</h3>
-        <p class="feat-desc">Committee members can observe interviews live with instant access to transcripts and real-time annotations.</p>
-        <div class="feat-shine" style="background:linear-gradient(90deg,transparent,#2563eb,transparent)"></div>
-      </div>
-      <div class="feat-card fc-teal reveal delay-3">
-        <div class="feat-icon" style="background:rgba(13,148,136,.1)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            <path d="M9 12l2 2 4-4"/>
-          </svg>
-        </div>
-        <h3 class="feat-title">Secure &amp; Scalable</h3>
-        <p class="feat-desc">Enterprise-grade security with role-based access control and end-to-end encrypted data pipelines.</p>
-        <div class="feat-shine" style="background:linear-gradient(90deg,transparent,#0d9488,transparent)"></div>
-      </div>
-      <div class="feat-card fc-amber reveal delay-4">
-        <div class="feat-icon" style="background:rgba(217,119,6,.1)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 3v18h18"/>
-            <path d="M7 16l4-6 4 3 4-7"/>
-          </svg>
-        </div>
-        <h3 class="feat-title">Smart Reporting</h3>
-        <p class="feat-desc">Automated reports with AI insights and comparative analytics for faster, better hiring decisions.</p>
-        <div class="feat-shine" style="background:linear-gradient(90deg,transparent,#d97706,transparent)"></div>
-      </div>
-    </div>
-  </div>
-</section>
+    <!-- LEFT: Hero Text -->
+    <div class="hero-content">
+      <h1 class="hero-h1">
+        Transform Interviews
+        <span class="hero-h1-line2"><em>with Chandigarh University</em></span>
+      </h1>
 
-<!-- ══ HOW IT WORKS ══ -->
-<section id="how" class="section how-section">
-  <div class="wrap">
-    <div class="s-center reveal">
-      <span class="section-tag tag-green">Process</span>
-      <h2 class="section-h">How It Works</h2>
-      <p class="section-p">Five seamless steps from scheduling to final decision — automated, secure, insightful.</p>
-    </div>
-    <div class="steps">
-      <div class="step reveal delay-1">
-        <div class="step-connector"></div>
-        <div class="step-num" style="background:#4f46e5">01</div>
-        <div class="step-body">
-          <div class="step-bar" style="background:#4f46e5"></div>
-          <h3 class="step-title">Schedule Interview</h3>
-          <p class="step-desc">Admin creates interview sessions, assigns panels, and sends invitations to candidates automatically.</p>
-        </div>
-        <div class="step-arrow" style="color:#4f46e5">
-          <svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke="currentColor" stroke-width="2">
-            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-          </svg>
-        </div>
-      </div>
-      <div class="step reveal delay-2">
-        <div class="step-connector"></div>
-        <div class="step-num" style="background:#7c3aed">02</div>
-        <div class="step-body">
-          <div class="step-bar" style="background:#7c3aed"></div>
-          <h3 class="step-title">Candidate Interview</h3>
-          <p class="step-desc">Students complete device checks and answer AI-generated questions while being securely recorded.</p>
-        </div>
-        <div class="step-arrow" style="color:#7c3aed">
-          <svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke="currentColor" stroke-width="2">
-            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-          </svg>
-        </div>
-      </div>
-      <div class="step reveal delay-3">
-        <div class="step-connector"></div>
-        <div class="step-num" style="background:#0d9488">03</div>
-        <div class="step-body">
-          <div class="step-bar" style="background:#0d9488"></div>
-          <h3 class="step-title">AI Analysis</h3>
-          <p class="step-desc">System analyzes speech, emotions, confidence, and body language providing automated insights.</p>
-        </div>
-        <div class="step-arrow" style="color:#0d9488">
-          <svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke="currentColor" stroke-width="2">
-            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-          </svg>
-        </div>
-      </div>
-      <div class="step reveal delay-4">
-        <div class="step-connector"></div>
-        <div class="step-num" style="background:#2563eb">04</div>
-        <div class="step-body">
-          <div class="step-bar" style="background:#2563eb"></div>
-          <h3 class="step-title">Committee Review</h3>
-          <p class="step-desc">Panel members evaluate recordings, review AI insights, and provide detailed evaluation scores.</p>
-        </div>
-        <div class="step-arrow" style="color:#2563eb">
-          <svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke="currentColor" stroke-width="2">
-            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-          </svg>
-        </div>
-      </div>
-      <div class="step reveal" style="transition-delay:.48s">
-        <div class="step-num" style="background:#d97706">05</div>
-        <div class="step-body">
-          <div class="step-bar" style="background:#d97706"></div>
-          <h3 class="step-title">Final Decision</h3>
-          <p class="step-desc">Chairman reviews all evaluations and makes the final selection with confidence and clarity.</p>
-        </div>
-        <div class="step-arrow" style="color:#d97706">
-          <svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke="currentColor" stroke-width="2">
-            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+      <p class="hero-sub">
+        Text-to-speech, speech-to-text, face recognition, and a powerful
+        dashboard—enhanced with intelligent automation for seamless interview
+        management, real-time insights, and comprehensive evaluation.
+      </p>
 
-<!-- ══ CTA ══ -->
-<section class="cta-section">
-  <div class="cta-bg"></div>
-  <div class="cta-mesh"></div>
-  <div class="cta-orb1"></div>
-  <div class="cta-orb2"></div>
-  <div class="cta-inner reveal">
-    <div class="cta-badge"><span class="ping-dot"></span> Join 500+ Institutions</div>
-    <h2 class="cta-h">Ready to Transform<br><span style="opacity:.82">Your Interview Process?</span></h2>
-    <p class="cta-p">Join hundreds of institutions using AI-powered interviews to make better, faster, and fairer hiring decisions.</p>
-    <div class="cta-btns">
-      <button class="btn-white" (click)="openModal('login')">
-        Get Started Now
-        <svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke="currentColor" stroke-width="2">
-          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-        </svg>
-      </button>
-      <button class="btn-ghost-white" (click)="scrollTo('features')">Learn More</button>
-    </div>
-    <div class="trust-list">
-      <div class="trust-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-          <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9" stroke-width="1.5"/>
-        </svg>
-        Enterprise Security
-      </div>
-      <div class="trust-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-          <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9" stroke-width="1.5"/>
-        </svg>
-        GDPR Compliant
-      </div>
-      <div class="trust-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-          <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9" stroke-width="1.5"/>
-        </svg>
-        SOC 2 Certified
-      </div>
-      <div class="trust-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-          <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9" stroke-width="1.5"/>
-        </svg>
-        99.9% Uptime
+      <div class="feature-pills">
+        <span class="pill">
+          <svg viewBox="0 0 16 16" fill="none" width="11" height="11"
+               stroke="currentColor" stroke-width="1.8"><polyline points="2 8 6 12 14 4"/></svg>
+          Face Recognition
+        </span>
+        <span class="pill">
+          <svg viewBox="0 0 16 16" fill="none" width="11" height="11"
+               stroke="currentColor" stroke-width="1.8"><polyline points="2 8 6 12 14 4"/></svg>
+          Secure Data Management
+        </span>
+        <span class="pill">
+          <svg viewBox="0 0 16 16" fill="none" width="11" height="11"
+               stroke="currentColor" stroke-width="1.8"><polyline points="2 8 6 12 14 4"/></svg>
+          Text-to-Speech Support
+        </span>
+        <span class="pill">
+          <svg viewBox="0 0 16 16" fill="none" width="11" height="11"
+               stroke="currentColor" stroke-width="1.8"><polyline points="2 8 6 12 14 4"/></svg>
+          Evaluation &amp; Scoring
+        </span>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- ══ FOOTER ══ -->
-<footer>
-  <div class="footer-glow"></div>
-  <div class="footer-inner">
-    <div>
-      <div class="footer-brand">
-        <div class="logo-mark" style="width:34px;height:34px;border-radius:10px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+    <!-- RIGHT: Login Card -->
+    <div class="login-panel">
+      <div class="cu-form-card">
+
+        <!-- Header -->
+        <div class="cu-form-header">
+          <div class="cu-logo-sm">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"
+                 stroke="#1a1150" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="cu-form-title">Welcome</h2>
+            <p class="cu-form-sub">Sign in here!!!</p>
+          </div>
+        </div>
+
+        <!-- Role tabs -->
+        <div class="cu-role-tabs">
+          <button class="cu-role-tab"
+                  [class.active]="selectedLoginRole === 'student'"
+                  (click)="fillDemo('student')">
+            <svg viewBox="0 0 16 16" fill="none" width="13" height="13"
+                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M8 2l6 3-6 3-6-3 6-3z"/>
+              <path d="M2 8l6 3 6-3"/>
+              <path d="M2 11l6 3 6-3"/>
+            </svg>
+            Candidate
+          </button>
+          <button class="cu-role-tab"
+                  [class.active]="selectedLoginRole === 'others'"
+                  (click)="fillDemo('others')">
+            <svg viewBox="0 0 16 16" fill="none" width="13" height="13"
+                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <circle cx="8" cy="5" r="2.5"/>
+              <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+            </svg>
+            Admin / Member
+          </button>
+        </div>
+
+        <!-- Email -->
+        <div class="cu-field">
+          <label class="cu-label">Email Address</label>
+          <div class="cu-input-wrap">
+            <svg class="cu-input-icon" viewBox="0 0 16 16" fill="none"
+                 width="14" height="14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+              <rect x="1" y="3" width="14" height="10" rx="1.5"/>
+              <path d="M1 5l7 5 7-5"/>
+            </svg>
+            <input type="email"
+                   class="cu-input"
+                   [(ngModel)]="loginEmail"
+                   [placeholder]="selectedLoginRole === 'student'
+                     ? 'Enter candidate email'
+                     : 'Enter admin / member email'"
+                   (keyup.enter)="doLogin()" />
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="cu-field">
+          <label class="cu-label">Password</label>
+          <div class="cu-input-wrap">
+            <svg class="cu-input-icon" viewBox="0 0 16 16" fill="none"
+                 width="14" height="14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+              <rect x="2" y="7" width="12" height="8" rx="1.5"/>
+              <path d="M5 7V5a3 3 0 016 0v2"/>
+            </svg>
+            <input type="password"
+                   class="cu-input"
+                   [(ngModel)]="loginPassword"
+                   placeholder="••••••••"
+                   (keyup.enter)="doLogin()" />
+          </div>
+        </div>
+
+        <!-- Inline error -->
+        <div class="cu-error" *ngIf="loginError">
+          <svg viewBox="0 0 16 16" fill="none" width="14" height="14"
+               stroke="currentColor" stroke-width="1.8">
+            <circle cx="8" cy="8" r="6"/>
+            <line x1="8" y1="5" x2="8" y2="8"/>
+            <circle cx="8" cy="11" r=".6" fill="currentColor"/>
           </svg>
+          {{ loginError }}
         </div>
-        <span class="footer-name">AI Interview</span>
-      </div>
-      <p class="footer-tag">Intelligent interviews, smarter decisions. Powered by cutting-edge AI technology.</p>
-      <div class="socials">
-        <a href="#" class="social" aria-label="Twitter">
-          <svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg>
-        </a>
-        <a href="#" class="social" aria-label="LinkedIn">
-          <svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
-        </a>
-        <a href="#" class="social" aria-label="GitHub">
-          <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
-        </a>
-      </div>
-    </div>
-    <div class="footer-links">
-      <div>
-        <h4 class="fl-head">Product</h4>
-        <ul class="fl-list">
-          <li><a href="#features" class="fl-link" (click)="$event.preventDefault(); scrollTo('features')">Features</a></li>
-          <li><a href="#how" class="fl-link" (click)="$event.preventDefault(); scrollTo('how')">How It Works</a></li>
-          <li><a href="#" class="fl-link">Pricing</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 class="fl-head">Company</h4>
-        <ul class="fl-list">
-          <li><a href="#" class="fl-link">About Us</a></li>
-          <li><a href="#" class="fl-link">Careers</a></li>
-          <li><a href="#" class="fl-link">Blog</a></li>
-          <li><a href="#" class="fl-link">Press</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 class="fl-head">Support</h4>
-        <ul class="fl-list">
-          <li><a href="#" class="fl-link">Help Center</a></li>
-          <li><a href="#" class="fl-link">Documentation</a></li>
-          <li><a href="#" class="fl-link">API Docs</a></li>
-          <li><a href="#" class="fl-link">Contact</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 class="fl-head">Legal</h4>
-        <ul class="fl-list">
-          <li><a href="#" class="fl-link">Privacy Policy</a></li>
-          <li><a href="#" class="fl-link">Terms of Service</a></li>
-          <li><a href="#" class="fl-link">Cookie Policy</a></li>
-          <li><a href="#" class="fl-link">GDPR</a></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <div class="fbot">
-      <p class="fbot-copy">© 2026 AI Interview System. All rights reserved.</p>
-      <div class="cert-badges">
-        <span class="cert">Enterprise Security</span>
-        <span class="cert">GDPR Compliant</span>
-        <span class="cert">SOC 2 Certified</span>
-      </div>
-    </div>
-  </div>
-</footer>
 
-<!-- ══ MODAL ══ -->
-<div class="modal-overlay" id="modal" [class.open]="modalOpen" (click)="onOverlayClick($event)">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h2 id="modal-title">{{ isLogin ? 'Welcome Back' : 'Create Account' }}</h2>
-      <button class="modal-close" (click)="closeModal()">
-        <svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M18 6L6 18M6 6l12 12"/>
-        </svg>
-      </button>
-    </div>
-    <div class="modal-body" id="modal-body">
-      <!-- Login Form -->
-      <ng-container *ngIf="isLogin">
-        <div class="demo-row">
-          <button class="demo-pill" (click)="fillDemo('student')">Demo Student</button>
-          <button class="demo-pill" (click)="fillDemo('admin')">Demo Admin</button>
-        </div>
-        <div class="form-field">
-          <label>Email</label>
-          <input type="email" [(ngModel)]="loginEmail" placeholder="you@example.com"/>
-        </div>
-        <div class="form-field">
-          <label>Password</label>
-          <input type="password" [(ngModel)]="loginPassword" placeholder="••••••••"/>
-        </div>
-        <button class="btn-submit" [disabled]="loginLoading" (click)="doLogin()">
-          <span class="spinner" *ngIf="loginLoading"></span>
-          {{ loginLoading ? 'Logging in…' : 'Login' }}
+        <!-- Sign In button -->
+        <button class="cu-btn-login"
+                (click)="doLogin()"
+                [disabled]="loginLoading">
+
+          <ng-container *ngIf="!loginLoading">
+            <svg viewBox="0 0 16 16" fill="none" width="14" height="14"
+                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <path d="M10 2h3a1 1 0 011 1v10a1 1 0 01-1 1h-3"/>
+              <polyline points="7 11 10 8 7 5"/>
+              <line x1="10" y1="8" x2="2" y2="8"/>
+            </svg>
+            Sign In
+          </ng-container>
+
+          <ng-container *ngIf="loginLoading">
+            <span class="spinner"></span>
+            Signing in…
+          </ng-container>
         </button>
-        <p class="modal-ft">No account? <button class="toggle-link" (click)="switchMode()">Sign up</button></p>
-      </ng-container>
 
-      <!-- Register Form -->
-      <ng-container *ngIf="!isLogin">
-        <div class="form-field">
-          <label>Full Name</label>
-          <input type="text" [(ngModel)]="registerName" placeholder="Your Name"/>
-        </div>
-        <div class="form-field">
-          <label>Email</label>
-          <input type="email" [(ngModel)]="registerEmail" placeholder="you@example.com"/>
-        </div>
-        <div class="form-field">
-          <label>Password</label>
-          <input type="password" [(ngModel)]="registerPassword" placeholder="••••••••"/>
-        </div>
-        <div class="form-field">
-          <label>Role</label>
-          <select [(ngModel)]="registerRole">
-            <option value="student">Student</option>
-            <option value="admin">Admin</option>
-          </select>
-        </div>
-        <button class="btn-submit" [disabled]="registerLoading" (click)="doRegister()">
-          <span class="spinner" *ngIf="registerLoading"></span>
-          {{ registerLoading ? 'Creating…' : 'Create Account' }}
-        </button>
-        <p class="modal-ft">Have an account? <button class="toggle-link" (click)="switchMode()">Login</button></p>
-      </ng-container>
-    </div>
-  </div>
-</div>
+        <div class="cu-divider"><span>or</span></div>
+        <p class="cu-switch-txt">
+          Don't have an account?
+          <button class="cu-switch-link" (click)="openModal('register')">Create one</button>
+        </p>
+
+      </div><!-- /cu-form-card -->
+
+      <div class="cu-security-badges">
+        <span class="cu-badge-item">
+          <svg viewBox="0 0 12 12" fill="none" width="10" height="10"
+               stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="5" width="10" height="6" rx="1"/>
+            <path d="M3 5V3.5a3 3 0 016 0V5"/>
+          </svg>
+          Enterprise Security
+        </span>
+        <span class="cu-badge-item">
+          <svg viewBox="0 0 12 12" fill="none" width="10" height="10"
+               stroke="currentColor" stroke-width="1.5">
+            <polyline points="2 6 5 9 10 3"/>
+          </svg>
+          GDPR Compliant
+        </span>
+      </div>
+
+    </div><!-- /login-panel -->
+
+  </div><!-- /page-body -->
+
+</div><!-- /full-page -->

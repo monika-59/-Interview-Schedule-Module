@@ -1,0 +1,195 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+* { box-sizing: border-box; }
+
+/* Page */
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: #f4f2ff;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Card */
+.form-card {
+  background: #fff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 720px;
+  box-shadow: 0 4px 32px rgba(99, 84, 255, 0.10);
+  overflow: hidden;
+  padding: 0;
+}
+
+/* Back button sits at top as colored header strip */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  padding: 6px 14px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background 0.15s;
+  width: auto !important;
+  margin-bottom: 0;
+}
+.back-btn:hover { background: rgba(255, 255, 255, 0.30); }
+
+/* Wrap the back-btn + h2 together as a colored header */
+.form-card > .back-btn,
+.form-card > h2 {
+  display: block;
+}
+
+/* Target the back button + h2 at top of card */
+.back-btn {
+  background: linear-gradient(120deg, #6354ff, #a78bfa) !important;
+  border: none !important;
+  color: #fff !important;
+  width: 100% !important;
+  border-radius: 0 !important;
+  padding: 20px 28px 0 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  justify-content: flex-start !important;
+  gap: 5px !important;
+}
+
+/* Since back-btn is standalone (no wrapper), use a clean approach: */
+/* Override above — use the actual selectors properly */
+
+.back-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: #f0eeff !important;
+  border: 1.5px solid #e0d9ff !important;
+  color: #6354ff !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  font-family: 'DM Sans', sans-serif !important;
+  padding: 7px 16px !important;
+  border-radius: 50px !important;
+  cursor: pointer !important;
+  margin: 22px 28px 0 !important;
+  transition: background 0.15s !important;
+  width: auto !important;
+}
+.back-btn:hover {
+  background: #6354ff !important;
+  color: #fff !important;
+  border-color: #6354ff !important;
+}
+
+/* Title */
+h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e1b3a;
+  padding: 14px 28px 0;
+  letter-spacing: -0.3px;
+  margin-bottom: 0;
+}
+
+/* Form */
+form { padding: 18px 28px 28px; }
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.field.full { grid-column: span 2; }
+
+/* Fields */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6354ff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+input, select, textarea {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  color: #1e1b3a;
+  background: #f8f7ff;
+  border: 1.5px solid #e5e2ff;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  width: 100%;
+}
+textarea { resize: none; line-height: 1.6; }
+input::placeholder, textarea::placeholder { color: #c0bcd8; }
+input:focus, select:focus, textarea:focus {
+  border-color: #6354ff;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(99, 84, 255, 0.10);
+}
+
+/* Validation */
+span {
+  font-size: 11px;
+  color: #f43f6e;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Submit */
+button[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 12px 28px;
+  background: #6354ff;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  width: auto;
+}
+button[type="submit"]:hover { background: #5244ee; transform: translateY(-1px); }
+button[type="submit"]:active { transform: scale(0.97); }
+button[type="submit"]:disabled {
+  background: #c7c3e8;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Mobile */
+@media (max-width: 520px) {
+  .grid { grid-template-columns: 1fr; }
+  .field.full { grid-column: span 1; }
+  button[type="submit"] { width: 100%; justify-content: center; }
+  form { padding: 16px 20px 24px; }
+  h2 { padding: 12px 20px 0; }
+  .back-btn { margin: 18px 20px 0 !important; }
+}

@@ -61,7 +61,7 @@
 
           <div class="dropdown-body" *ngIf="isOpen">
             <div *ngFor="let candidate of assignCandidates; let i = index" class="dropdown-item"
-              [class.active]="selectedIndex === i" (click)="selectCandidate(candidate, i)">
+              [class.active]="selectedIndex === i">
               <div class="avatar" [style.background]="candidate.color">
                 {{ candidate.candidate_name.charAt(0) }}
               </div>
@@ -339,7 +339,9 @@
       <div>Question Asked</div>
       <div>Candidate Answer</div>
       <div>Expected Answer</div>
+      <div>Ai Response</div>
       <div>Score</div>
+      <div>Ai Score</div>
     </div>
 
     <!-- DATA -->
@@ -357,6 +359,10 @@
         {{ q.expectedAnswer }}
       </div>
 
+      <div class="ai-response">
+        {{ q.ai_response }}
+      </div>
+
       <div class="score-cell">
         <input 
           type="number"
@@ -365,6 +371,9 @@
           [(ngModel)]="q.score"
           class="score-input"
         />
+      </div>
+      <div class="ai-score">
+        {{ q.ai_score }}/10
       </div>
     </div>
 

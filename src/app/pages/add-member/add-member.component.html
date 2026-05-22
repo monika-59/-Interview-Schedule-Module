@@ -1,0 +1,64 @@
+<div class="page">
+  <div class="form-card">
+       <!-- 🔙 BACK BUTTON -->
+        <div class="back-wrapper">
+  <button class="back-btn" (click)="goBack()">← Back</button>
+</div>
+    <!-- <button class="back-btn" (click)="goBack()">← Back</button> -->
+    <h2>Add Member</h2>
+   <!-- 🔙 BACK BUTTON -->
+   
+    <form #memberForm="ngForm" (ngSubmit)="onSubmit(memberForm)">
+
+      <div class="grid">
+
+        <div class="field">
+          <label>Name</label>
+          <input type="text" name="name" [(ngModel)]="member.name" required #name="ngModel" />
+          <span *ngIf="name.invalid && name.touched">Required</span>
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="email" [(ngModel)]="member.email" required email #email="ngModel" />
+          <span *ngIf="email.invalid && email.touched">Invalid email</span>
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" [(ngModel)]="member.password" required minlength="6" #password="ngModel" />
+          <span *ngIf="password.invalid && password.touched">Min 6 characters</span>
+        </div>
+
+        <div class="field">
+          <label>Designation</label>
+          <input type="text" name="designation" [(ngModel)]="member.designation" required #designation="ngModel" />
+          <span *ngIf="designation.invalid && designation.touched">Required</span>
+        </div>
+
+        <div class="field">
+          <label>Member Type</label>
+          <select name="memberType" [(ngModel)]="member.memberType" required #memberType="ngModel">
+            <option value="">Select</option>
+            <option value="Internal">Internal</option>
+            <option value="External">External</option>
+          </select>
+          <span *ngIf="memberType.invalid && memberType.touched">Required</span>
+        </div>
+
+        <div class="field">
+          <label>Role</label>
+          <select name="role" [(ngModel)]="member.role">
+            <option value="member">Member</option>
+          </select>
+        </div>
+
+      </div>
+
+      <button type="submit" [disabled]="memberForm.invalid">
+        Add Member
+      </button>
+
+    </form>
+  </div>
+</div>

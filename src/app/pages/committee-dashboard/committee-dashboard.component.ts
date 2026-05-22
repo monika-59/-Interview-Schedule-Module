@@ -71,11 +71,16 @@ export class CommitteeDashboardComponent implements OnInit {
   isVideoModalOpen = false;
   interviewCandidates: any[] = [];
   assignCandidates: any[] = [];
-
+  interviews: any[] = [];
+  selectedMemberDetails: any = null;
+  isMemberModalOpen = false;
+  members: any[] = [];
+  panelMembers: any[] | null = null;
   dashboard: any = {};
   user: any = {};
   userId!: number;
 
+  isEvaluated: boolean = false;
   selectedIndex: number = 0;   // 👉 first item selected
   isOpen = true;              // 👉 dropdown open
   selectedCandidate: any = null; // 👉 no fake empty object
@@ -211,29 +216,29 @@ export class CommitteeDashboardComponent implements OnInit {
   // ];
 
   defaultTags = [
-  'Strong ML background',
-  'High academic score',
-  'Verify project depth',
-  'Relocation: Yes'
-];
+    'Strong ML background',
+    'High academic score',
+    'Verify project depth',
+    'Relocation: Yes'
+  ];
 
-staticQA = [
-  {
-    question: 'Explain OOP concepts',
-    answer: 'Inheritance, Polymorphism, Encapsulation...',
-    score: 9
-  },
-  {
-    question: 'What is REST API?',
-    answer: 'Representational State Transfer...',
-    score: 8
-  },
-  {
-    question: 'Reverse a linked list',
-    answer: 'Using three pointers method...',
-    score: 10
-  }
-];
+  staticQA = [
+    {
+      question: 'Explain OOP concepts',
+      answer: 'Object-Oriented Programming (OOP) is a programming approach where you organize code using objects and classes, making it easier to manage, reuse, and scale.',
+      score: 9
+    },
+    {
+      question: 'What is REST API?',
+      answer: 'A REST API (Representational State Transfer Application Programming Interface) is a way for different software systems to communicate over the internet using standard HTTP methods.',
+      score: 8
+    },
+    {
+      question: 'Reverse a linked list',
+      answer: 'Reversing a linked list is a classic problem. The idea is to change the direction of the next pointers so the list goes backward.',
+      score: 10
+    }
+  ];
   // criteria: Criterion[] = [
   //   { label: 'Technical Knowledge', key: 'tech' },
   //   { label: 'Problem Solving', key: 'prob' },
@@ -242,7 +247,7 @@ staticQA = [
   //   { label: 'Overall Impression', key: 'overall' }
   // ];
 
-    criteria: Criteria[] = [
+  criteria: Criteria[] = [
     { name: 'Technical Knowledge', score: 0 },
     { name: 'Problem Solving', score: 0 },
     { name: 'Communication', score: 0 },
@@ -270,17 +275,73 @@ staticQA = [
     console.log('User ID:', this.userId);
     this.getLoginUserData();
     this.getDashBoardData();
+    this.getInterviewListData();
+
+
     // this.initializeScores();
     // this.getInterviewCandidatesData();
-
-
-    this.loadMemberOfInterviews();
   }
 
+
   goToChairmanPage() {
-  this.router.navigate(['/ChairmanDashboard', this.userId]);
+    this.router.navigate(['/ChairmanDashboard', this.userId]);
+  }
+
+  selectedRowIndex: number | null = null;
+  selectedInterview: any = null;
+
+ viewDetails(item: any, index: number) {
+
+  // ✅ Toggle close
+  if (this.selectedRowIndex === index) {
+    this.selectedRowIndex = null;
+    this.selectedInterview = null;
+    this.isEvaluated = false;
+    return;
+  }
+
+  // ✅ Open row
+  this.selectedRowIndex = index;
+  this.selectedInterview = item;
+
+  console.log("👉 Candidate ID:", item.candidate_id);
+
+  // ✅ Reset flag
+  this.isEvaluated = false;
+
+  // =========================
+  // ✅ CALL REMARK API
+  // =========================
+  this.dashboardService
+    .getFinalVerdict(item.candidate_id, this.userId) // API name same, response changed
+    .subscribe({
+      next: (res: any) => {
+
+        console.log("👉 API RESPONSE:", res);
+
+        const remarkArr = res?.remark;
+
+        // ✅ CHECK REMARK
+        if (!remarkArr || remarkArr.length === 0) {
+          this.isEvaluated = false;
+        } else {
+          const remark = remarkArr[0]?.trim();
+
+          this.isEvaluated = remark && remark !== '';
+        }
+
+        console.log("👉 FINAL FLAG:", this.isEvaluated);
+      },
+
+      error: (err) => {
+        console.error("❌ API ERROR:", err);
+        this.isEvaluated = false;
+      }
+    });
+
+  // ✅ Existing API
+  this.loadMemberOfInterviews(item.candidate_id);
 }
- 
   // Get Login User Data
   getLoginUserData() {
     this.authService.getUser(this.userId).subscribe({
@@ -305,120 +366,279 @@ staticQA = [
     });
   }
 
-  //get Interview Dropdwon
-  loadMemberOfInterviews() {
-    this.interviewService.getMemberInterviews(this.userId).subscribe({
+
+  // Get Interview   Data
+  getInterviewListData() {
+    this.interviewService.getInterviewDetails(this.userId).subscribe({
       next: (res: any) => {
-        console.log('API Response:', res);   // full response
-       // this.assignCandidates = res;
-           // ✅ Filter only members
-      this.assignCandidates = res.filter(
-        (c: any) => c.role?.toLowerCase() === 'member'
-      );
-        console.log('Candidates:', this.assignCandidates); // after assign
-
-
-        // ✅ Auto select first candidate
-        if (this.assignCandidates && this.assignCandidates.length > 0) {
-          this.selectCandidate(this.assignCandidates[0], 0);
-        }
+        this.interviews = res;
       },
-      error: (err) => console.error(err)
+      error: (err) => {
+        console.error('Error loading dashboard', err);
+      }
     });
+  }
+  //get Interview Dropdwon
+  loadMemberOfInterviews(candidateId: number) {
+
+    this.interviewService
+      .getMemberInterviews(this.userId, candidateId)
+      .subscribe({
+        next: (res: any) => {
+          console.log('API Response:', res);
+
+          // ✅ Direct assign (no filter)
+          this.assignCandidates = res;
+
+          console.log('Candidates:', this.assignCandidates);
+
+          // ✅ Auto select first candidate
+          if (this.assignCandidates?.length > 0) {
+            this.selectCandidate(this.assignCandidates[0], 0);
+          }
+        },
+        error: (err) => console.error(err)
+      });
   }
 
   toggleDropdown() {
     this.isOpen = !this.isOpen;
   }
 
- selectCandidate(candidate: any, index: number) {
-  this.selectedIndex = index;
 
-  const candidateId = candidate.candidate_id;
+  viewMemberDetails(member: any) {
+    console.log("Clicked 👉", member);
 
-  // Call BOTH APIs
-  forkJoin({
-    candidate: this.dashboardService.getCandidate(candidateId),
-    qa: this.dashboardService.getQA(candidateId)
-  }).subscribe({
-    next: (res: any) => {
+    forkJoin({
+      qa: this.dashboardService.getPanelQuestionScores(member.panel_id),
+      //final: this.dashboardService.getFinalMark(member.candidate_id, member.memberid)
+      final: this.dashboardService.getPanelEvaluationFinalMark(member.panel_id)
 
-      // Candidate data
-      this.selectedCandidate = res.candidate;
+    }).subscribe({
+      next: (res: any) => {
 
-      // Add QA LIST into same object
-      this.selectedCandidate.qaList = res.qa.qaList || [];
+        console.log("QA RESPONSE 👉", res.qa);
+        console.log("FINAL RESPONSE 👉", res.final);
 
-      // Clean skills
-      if (this.selectedCandidate.skills) {
-        this.selectedCandidate.skills =
-          this.selectedCandidate.skills.map((s: string) => s.trim());
-      }
+        // ✅ NO FILTERING → USE FULL RESPONSE
+        this.selectedMemberDetails = {
+          qaList: res.qa,   // ✅ keep members array
+          final: res.final
+        };
+        this.members = res.final; // ✅ key line
+        console.log("FINAL UI DATA 👉", this.selectedMemberDetails);
 
-      console.log('FINAL DATA 👉', this.selectedCandidate);
-    },
-    error: (err) => console.error(err)
-  });
-}
+        this.isMemberModalOpen = true;
+      },
+      error: (err) => console.error("ERROR 👉", err)
+    });
+  }
 
+  closeMemberModal() {
+    this.isMemberModalOpen = false;
+  }
 
+  closeRightPanel() {
+    this.selectedCandidate = null;
+    this.selectedInterview = null;
+  }
 
+  selectCandidate(candidate: any, index: number) {
+    this.selectedIndex = index;
 
+    const candidateId = candidate.candidate_id;
+    // ✅ Loading state
+    this.panelMembers = null;
+    // Call BOTH APIs
+    forkJoin({
+      candidate: this.dashboardService.getCandidate(candidateId),
+      qa: this.dashboardService.getQA(candidateId, this.userId),
+      panel: this.dashboardService.getPanelMembers(candidate.panel_id),
+      // ✅ NEW API
+      finalMark: this.dashboardService.getFinalMark(candidateId, this.userId)
+
+    }).subscribe({
+      next: (res: any) => {
+
+        // Candidate data
+        this.selectedCandidate = res.candidate;
+
+        // Add QA LIST into same object
+        this.selectedCandidate.qaList = res.qa.qaList || [];
+        console.log('Q&A Evaluation Log 👉', this.selectedCandidate.qaList);
+        // Clean skills
+        if (this.selectedCandidate.skills) {
+          this.selectedCandidate.skills =
+            this.selectedCandidate.skills.map((s: string) => s.trim());
+        }
+
+        this.panelMembers = res.panel;
+
+        console.log('PANEL 👉', this.panelMembers);
+
+        // ✅ SET FINAL MARKS HERE
+        if (res.finalMark && !res.finalMark.message) {
+          this.setFinalMarks(res.finalMark);
+        } else {
+          this.resetFinalMarks(); // if no data
+        }
+        console.log('FINAL DATA 👉', this.selectedCandidate);
+      },
+      error: (err) => console.error(err)
+    });
+  }
+
+  setFinalMarks(data: any) {
+    this.criteria = [
+      { name: 'Technical Knowledge', score: data.technical_knowledge || 0 },
+      { name: 'Problem Solving', score: data.problem_solving || 0 },
+      { name: 'Communication', score: data.communication || 0 },
+      { name: 'Domain Aptitude', score: data.domain_aptitude || 0 },
+      { name: 'Overall Impression', score: data.overall_impression || 0 }
+    ];
+
+    this.remarks = data.remark || '';
+    this.verdict = data.final_verdict || '';
+  }
+
+  resetFinalMarks() {
+    this.criteria = [
+      { name: 'Technical Knowledge', score: 0 },
+      { name: 'Problem Solving', score: 0 },
+      { name: 'Communication', score: 0 },
+      { name: 'Domain Aptitude', score: 0 },
+      { name: 'Overall Impression', score: 0 }
+    ];
+
+    this.remarks = '';
+    this.verdict = '';
+  }
 
   selectVerdict(value: string) {
     this.verdict = value;
   }
 
-  // submit() {
+  get completedCount(): number {
+    return this.panelMembers?.filter((m: any) => m.status === 'Done')?.length || 0;
+  }
+
+  //  submit() {
+
   //   const payload = {
-  //     scores: this.criteria,
-  //     total: this.totalScore,
-  //     remarks: this.remarks,
-  //     verdict: this.verdict
+  //     candidateId: this.selectedCandidate.id,
+  //     memberId: this.userId,
+  //     remark: this.remarks,
+  //     verdict: this.verdict,
+
+  //     qaList: this.selectedCandidate.qaList.map((q: any) => ({
+  //       question_id: q.question_id,   // ✅ ADD THIS
+  //       score: q.score || 0
+  //     }))
   //   };
 
-  //   console.log('Final Evaluation:', payload);
-  //   alert('Submitted!');
+  //   console.log('Sending Payload 👉', payload);
+
+  //   this.dashboardService.saveEvaluation(payload).subscribe({
+  //     next: (res: any) => {
+  //       console.log('Saved ✅', res);
+  //       alert('Evaluation submitted successfully!');
+  //     },
+  //     error: (err) => {
+  //       console.error('Error ❌', err);
+  //       alert('Failed to submit');
+  //     }
+  //   });
   // }
 
- submit() {
+  // submit() {
 
-  const payload = {
-    candidateId: this.selectedCandidate.id,
-    memberId: this.userId,
-    remark: this.remarks,
-    verdict: this.verdict,
+  //   const payload = {
+  //     candidateId: this.selectedCandidate.id, // ✅ FIXED
+  //     memberId: this.userId,
+  //     remark: this.remarks,
+  //     verdict: this.verdict,
 
-    qaList: this.selectedCandidate.qaList.map((q: any) => ({
-      question_id: q.question_id,   // ✅ ADD THIS
-      score: q.score || 0
-    }))
-  };
+  //     // ✅ QA LIST
+  //     qaList: this.selectedCandidate.qaList.map((q: any) => ({
+  //       question_id: q.question_id,
+  //       score: q.score || 0
+  //     })),
 
-  console.log('Sending Payload 👉', payload);
+  //     // ✅ FINAL MARKING
+  //     technical_knowledge: this.criteria[0].score,
+  //     problem_solving: this.criteria[1].score,
+  //     communication: this.criteria[2].score,
+  //     domain_aptitude: this.criteria[3].score,
+  //     overall_impression: this.criteria[4].score
+  //   };
 
-  this.dashboardService.saveEvaluation(payload).subscribe({
-    next: (res: any) => {
-      console.log('Saved ✅', res);
-      alert('Evaluation submitted successfully!');
-    },
-    error: (err) => {
-      console.error('Error ❌', err);
-      alert('Failed to submit');
-    }
-  });
-}
+  //   console.log('Sending Payload 👉', payload);
+
+  //   this.dashboardService.saveEvaluation(payload).subscribe({
+  //     next: (res: any) => {
+  //       console.log('Saved ✅', res);
+  //       alert('Evaluation submitted successfully!');
+  //     },
+  //     error: (err) => {
+  //       console.error('Error ❌', err);
+  //       alert('Failed to submit');
+  //     }
+  //   });
+  // }
 
 
-getTagClass(tag: string) {
-  tag = tag.toLowerCase();
 
-  if (tag.includes('strong') || tag.includes('high')) return 'tag green';
-  if (tag.includes('verify')) return 'tag red';
-  if (tag.includes('relocation')) return 'tag blue';
+  submit() {
 
-  return 'tag';
-}
+    const payload = {
+      candidateId: this.selectedCandidate.id,
+      memberId: this.userId,
+      remark: this.remarks,
+      verdict: this.verdict,
+
+      qaList: this.selectedCandidate.qaList.map((q: any) => ({
+        question_id: q.question_id,
+        score: q.score || 0
+      })),
+
+      technical_knowledge: this.criteria[0].score,
+      problem_solving: this.criteria[1].score,
+      communication: this.criteria[2].score,
+      domain_aptitude: this.criteria[3].score,
+      overall_impression: this.criteria[4].score
+    };
+
+    console.log('Sending Payload 👉', payload);
+
+    this.dashboardService.saveEvaluation(payload).subscribe({
+      next: (res: any) => {
+        console.log('Saved ✅', res);
+
+        // ✅ SHOW BACKEND MESSAGE
+        alert(res?.message || 'Evaluation submitted successfully!');
+
+        // ✅ Optional: refresh / reset
+        // this.resetForm();
+        window.location.reload();
+
+      },
+      error: (err) => {
+        console.error('Error ❌', err);
+
+        alert(err?.error?.error || 'Failed to submit');
+      }
+    });
+  }
+
+  getTagClass(tag: string) {
+    tag = tag.toLowerCase();
+
+    if (tag.includes('strong') || tag.includes('high')) return 'tag green';
+    if (tag.includes('verify')) return 'tag red';
+    if (tag.includes('relocation')) return 'tag blue';
+
+    return 'tag';
+  }
   get totalScore(): number {
     return this.criteria.reduce((sum, c) => sum + c.score, 0);
   }
@@ -431,16 +651,6 @@ getTagClass(tag: string) {
     if (!this.selectedCandidate.recordedVideo) return null;
     return this.sanitizer.bypassSecurityTrustUrl(this.selectedCandidate.recordedVideo);
   }
-
-
-
-
-
-
-
-
-
-
 
   // 🔥 Dynamic avatar color
   getColor(name: string): string {
@@ -518,89 +728,19 @@ getTagClass(tag: string) {
     }
   }
 
+  getTotal(member: any): number {
+    return (
+      (member.technical_knowledge || 0) +
+      (member.problem_solving || 0) +
+      (member.communication || 0) +
+      (member.domain_aptitude || 0) +
+      (member.overall_impression || 0)
+    );
+  }
 
-  // selectCandidate(index: number) {
-  //   this.currentCandidateIndex = index;
-  // }
+  getAverage(member: any): number {
+    const total = this.getTotal(member);
+    return total / 5; // 5 criteria
+  }
 
-  // selectCandidate(candidateId: number, index: number): void {
-  //   this.currentCandidateIndex = index;
-
-  //   this.dashboardService.getCandidate(candidateId).subscribe({
-  //     next: (res: any) => {
-
-  //       this.selectedCandidate = {
-  //         name: res.name,
-  //         init: res.name?.charAt(0).toUpperCase() || '',
-
-  //         initBg: '#007bff',
-  //         initColor: '#fff',
-
-  //         meta: [
-  //           res.student_course_program,
-  //           res.student_department_branch,
-  //           res.student_university,
-  //           res.student_enrollment_no
-  //         ].filter(Boolean).join(' · '),
-
-  //         dob: res.dob,
-  //         gen: [res.gen, res.category].filter(Boolean).join(' · '),
-  //         mob: res.mob,
-  //         email: res.email,
-
-  //         cgpa: res.cgpa,
-  //         sem: res.sem,
-
-  //         skills: Array.isArray(res.skills)
-  //           ? res.skills.map((s: string) => s.trim())
-  //           : [],
-
-  //         ai: 'Auto generated summary not available',
-  //         aiTags: [],
-
-  //         schedule: {
-  //           interviewId: res.interview_id || 'N/A',
-  //           date: '',
-  //           time: '',
-  //           role: '',
-  //           status: 'Pending'
-  //         },
-
-  //         recordedVideo: res.recordedVideo || null,
-
-  //         evaluations: []
-  //       };
-
-  //     },
-  //     error: (err) => console.error('Error loading candidate', err)
-  //   });
-  // }
-
-  // loadMemberOfInterviews() {
-  //   this.interviewService.getMemberInterviews(this.userId).subscribe({
-  //     next: (res: any) => {
-  //       this.assignCandidates = res.map((c: any) => ({
-  //         ...c,
-  //         initBg: '#007bff',     // default color
-  //         initColor: '#cc4040'
-  //       }));
-  //     },
-  //     error: (err) => {
-  //       console.error('Error loading interviews', err);
-  //     }
-  //   });
-  // }
-
-  // initializeScores(): void {
-  //   this.scores = {};
-  //   this.criteria.forEach(c => this.scores[c.key] = 0);
-  // }
-
-  // selectCandidate(index: number): void {
-  //   this.currentCandidateIndex = index;
-  //   this.initializeScores();
-  //   this.verdict = '';
-  //   this.remarks = '';
-  //   this.closeVideoModal();
-  // }
 }

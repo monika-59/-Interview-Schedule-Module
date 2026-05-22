@@ -1,0 +1,72 @@
+<div class="container my-5">
+  <div class="card shadow-sm border-0 mx-auto" style="max-width: 650px; border-radius: 12px;">
+    <div class="card-header bg-primary text-white p-4" style="border-radius: 12px 12px 0 0;">
+      <h3 class="mb-1 text-white" style="font-weight: 600;">AI Question Bank Generator</h3>
+      <p class="mb-0 text-white-50 small">Upload course materials to generate structured interview evaluation banks.</p>
+    </div>
+    
+    <div class="card-body p-4">
+      <form (ngSubmit)="onGenerate(genForm)" #genForm="ngForm">
+        
+        <div class="mb-4">
+          <label class="form-label font-weight-bold" style="font-weight: 600;">Target Course / Program <span class="text-danger">*</span></label>
+          <select class="form-select py-2" [(ngModel)]="selectedCourse" name="course" required #courseCtrl="ngModel" [disabled]="isLoading">
+            <option value="" disabled selected>-- Select Academic Course --</option>
+            <option value="BBA">BBA</option>
+            <option value="MBA">MBA</option>
+            <option value="B-Tech">B-Tech</option>
+            <option value="MCA">MCA</option>
+            <option value="B.Com">B.Com</option>
+            <option value="M.Com">M.Com</option>
+          </select>
+          <div *ngIf="courseCtrl.invalid && courseCtrl.touched" class="text-danger small mt-1">
+            Please select a course to map the incoming questions properly.
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" style="font-weight: 600;">Number of Questions</label>
+          <input type="number" class="form-control py-2" [(ngModel)]="numQuestions" name="numQuestions" min="1" max="10" [disabled]="isLoading">
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" style="font-weight: 600;">Reference Syllabus / Document (PDF) <span class="text-danger">*</span></label>
+          <div class="upload-zone p-4 text-center border border-2 border-dashed rounded-3 bg-light" 
+               [class.border-primary]="selectedFile"
+               style="cursor: pointer; position: relative;">
+            <input type="file" (change)="onFileSelected($event)" accept="application/pdf" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" style="cursor: pointer;" [disabled]="isLoading"/>
+            
+            <div *ngIf="!selectedFile">
+              <i class="bi bi-file-earmark-pdf text-secondary display-5 mb-2 d-block"></i>
+              <span class="text-muted d-block">Drag and drop your PDF here or click to browse</span>
+            </div>
+            
+            <div *ngIf="selectedFile" class="text-success">
+              <i class="bi bi-check-circle-fill display-5 mb-2 d-block"></i>
+              <strong class="d-block text-truncate mx-auto" style="max-width: 90%;">{{ selectedFile.name }}</strong>
+              <span class="text-muted small">({{ (selectedFile.size / 1024 / 1024) | number:'1.2-2' }} MB)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-grid mt-4">
+          <button type="submit" class="btn btn-primary btn-lg py-2.5 font-weight-bold" [disabled]="genForm.invalid || !selectedFile || isLoading" style="font-weight: 600;">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            {{ isLoading ? 'Analyzing & Generating Questions...' : 'Generate and Sync to Database' }}
+          </button>
+        </div>
+      </form>
+
+      <div *ngIf="statusMessage" class="alert alert-success mt-4 border-0 d-flex align-items-center" role="alert">
+        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+        <div>{{ statusMessage }}</div>
+      </div>
+
+      <div *ngIf="errorMessage" class="alert alert-danger mt-4 border-0 d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+        <div>{{ errorMessage }}</div>
+      </div>
+
+    </div>
+  </div>
+</div>

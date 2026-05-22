@@ -4,6 +4,9 @@ import { ScheduleComponent } from './pages/schedule/schedule.component';
 import { LandingPageComponent } from './pages/landing-page/landing-page.component';
 import { CommitteeDashboardComponent } from './pages/committee-dashboard/committee-dashboard.component';
 import { ChairmanDashboardComponent } from './pages/chairman-dashboard/chairman-dashboard.component';
+import { AddMemberComponent } from './pages/add-member/add-member.component';
+import { AddQuestionsComponent } from './pages/add-questions/add-questions.component';
+import { CandidateLoginComponent } from './pages/candidate-login/candidate-login.component';
 
 export const routes: Routes = [
     // { path: '', component: ExamComponent },
@@ -17,4 +20,7 @@ export const routes: Routes = [
     { path: '', component: LandingPageComponent },
       { path: 'CommitteeDashboard/:id', component: CommitteeDashboardComponent },
     { path: 'ChairmanDashboard/:id', component: ChairmanDashboardComponent },
+         { path: 'add-member', component: AddMemberComponent },
+      { path: 'add-question', component: AddQuestionsComponent },
+      { path: 'login', component: CandidateLoginComponent },
 ];

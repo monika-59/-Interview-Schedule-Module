@@ -20,45 +20,126 @@
   border-bottom: 3px solid #4f5fd5;
 }
 
-.header h2 {
+.header h2,
+.header p {
   color: #ffffff;
   font-size: 20px;
   font-weight: 500;
-  letter-spacing: 0.3px;
 }
 
-/* ===== START SECTION ===== */
-.start-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 62px);
+/* =========================================================
+   🔥 NEW: PRE-CHECK SECTION (FACE + AUDIO)
+========================================================= */
+.pre-check {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+  padding: 28px 36px;
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
-.start-section button {
-  background-color: #4f5fd5;
-  color: #ffffff;
-  border: none;
-  padding: 14px 40px;
-  font-size: 16px;
+@media (max-width: 860px) {
+  .pre-check {
+    grid-template-columns: 1fr;
+    padding: 20px 18px;
+  }
+}
+
+/* ===== SHARED CARD STYLE ===== */
+.video-section,
+.audio-section,
+.question-section {
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e5ec;
+  padding: 24px;
+}
+
+/* ===== SECTION HEADINGS ===== */
+.video-section h3,
+.audio-section h3,
+.question-section h3 {
+  font-size: 14px;
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #6b7280;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e5ec;
+}
+
+/* ===== VIDEO ===== */
+.video-section video {
+  width: 100%;
   border-radius: 8px;
-  cursor: pointer;
-  letter-spacing: 0.4px;
-  transition: background-color 0.2s ease, transform 0.15s ease;
+  background-color: #0f1117;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  margin-bottom: 12px;
 }
 
-.start-section button:hover {
-  background-color: #3d4cc2;
-  transform: translateY(-1px);
+/* ===== FACE STATUS ===== */
+.video-section p {
+  font-size: 13px;
+  margin-top: 6px;
 }
 
-.start-section button:active {
-  background-color: #3341b0;
-  transform: translateY(0);
+/* =========================================================
+   🔥 AUDIO METER
+========================================================= */
+.audio-meter {
+  width: 100%;
+  height: 22px;
+  background: #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
 }
 
-/* ===== MAIN CONTENT (two-column layout) ===== */
+.audio-level {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444);
+  transition: width 0.1s linear;
+}
+
+/* =========================================================
+   🔥 INSTRUCTIONS
+========================================================= */
+.instructions {
+  margin-top: 20px;
+}
+
+.instructions ul {
+  padding-left: 18px;
+}
+
+.instructions li {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #374151;
+}
+
+/* 🔴 RED NOTE */
+.start-note {
+  margin-top: 14px;
+  padding: 12px;
+  background-color: #ffe5e5;
+  border-left: 4px solid #dc2626;
+  color: #b91c1c;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+/* =========================================================
+   EXISTING INTERVIEW UI (UNCHANGED)
+========================================================= */
+
+/* ===== MAIN CONTENT ===== */
 .content {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
@@ -75,60 +156,22 @@
   }
 }
 
-/* ===== SHARED CARD STYLE ===== */
-.video-section,
-.question-section {
-  background-color: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e2e5ec;
-  padding: 24px;
-}
-
-/* ===== SECTION HEADINGS ===== */
-.video-section h3,
-.question-section h3 {
-  font-size: 14px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #6b7280;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #e2e5ec;
-}
-
-/* ===== VIDEO SECTION ===== */
-.video-section video {
-  width: 100%;
-  border-radius: 8px;
-  background-color: #0f1117;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  display: block;
-  margin-bottom: 12px;
-}
-
+/* ===== VIDEO STATUS ===== */
 .video-section p[style*="color: red"] {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   font-size: 13px;
   color: #dc2626 !important;
   font-weight: 500;
-  margin-bottom: 8px;
 }
 
 .video-section p[style*="color: gray"] {
   font-size: 12px;
   color: #9ca3af !important;
-  margin-top: 4px;
 }
 
-/* ===== QUESTION SECTION ===== */
+/* ===== QUESTION ===== */
 .question-section p:not([style]) {
   font-size: 16px;
   line-height: 1.7;
-  color: #1e2330;
   margin-bottom: 16px;
 }
 
@@ -143,10 +186,8 @@
   padding: 7px 16px;
   border-radius: 6px;
   font-size: 13px;
-  font-weight: 500;
   cursor: pointer;
   margin-bottom: 18px;
-  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .replay-btn:hover {
@@ -157,7 +198,6 @@
 /* Timer */
 .question-section h4 {
   font-size: 15px;
-  font-weight: 500;
   color: #374151;
   background-color: #f5f6f8;
   display: inline-block;
@@ -171,15 +211,6 @@
 .question-section p[style*="color: red"] {
   font-size: 13px;
   color: #dc2626 !important;
-  font-weight: 500;
-  margin-bottom: 10px;
-}
-
-/* Loading */
-.question-section p:has(+ ng-template),
-ng-template p {
-  color: #6b7280;
-  font-size: 15px;
 }
 
 /* Textarea */
@@ -189,15 +220,10 @@ ng-template p {
   background-color: #f9fafb;
   border: 1px solid #e2e5ec;
   border-radius: 8px;
-  padding: 150px 16px;
-  padding-top: 10px;
+  padding: 120px 16px 10px;
   font-size: 14px;
-  line-height: 1.6;
   color: #374151;
-  font-family: inherit;
   margin-top: 8px;
-  transition: border-color 0.2s ease;
-  outline: none;
 }
 
 .question-section textarea:focus {
@@ -210,64 +236,29 @@ ng-template p {
   font-size: 13px;
   color: #d97706 !important;
   margin-top: 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 /* ===== BUTTON GROUP ===== */
 .btn-group {
   display: flex;
   gap: 12px;
-  flex-wrap: wrap;
 }
 
-.btn-group button {
-  background-color: #4f5fd5;
-  color: #ffffff;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 7px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
-}
-
-.btn-group button:hover:not([disabled]) {
-  background-color: #3d4cc2;
-  transform: translateY(-1px);
-}
-
-.btn-group button:active:not([disabled]) {
-  transform: translateY(0);
-}
-
-.btn-group button[disabled] {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-/* ===== COMPLETION SCREEN ===== */
+/* ===== COMPLETION ===== */
 .completion {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 62px);
-  gap: 12px;
-  padding: 40px;
+  height: 80vh;
   text-align: center;
 }
 
 .completion h2 {
   font-size: 26px;
-  font-weight: 500;
-  color: #1e2330;
 }
 
 .completion p {
   font-size: 15px;
   color: #6b7280;
-  max-width: 400px;
 }

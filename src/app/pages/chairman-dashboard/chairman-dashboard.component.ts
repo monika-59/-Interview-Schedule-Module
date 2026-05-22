@@ -275,7 +275,7 @@ staticQA  = [
     // this.getInterviewCandidatesData();
 
 
-    this.loadMemberOfInterviews();
+    // this.loadMemberOfInterviews();
   }
 
   goToMemberPage() {
@@ -307,69 +307,69 @@ staticQA  = [
   }
 
   //get Interview Dropdwon
-  loadMemberOfInterviews() {
-    this.interviewService.getMemberInterviews(this.userId).subscribe({
-      next: (res: any) => {
-        console.log('API Response:', res);   // full response
-        //this.assignCandidates = res;
-        console.log('Candidates:', this.assignCandidates); // after assign
-         this.assignCandidates = res.filter(
-        (c: any) => c.role?.toLowerCase() === 'chairman'
-      );
+  // loadMemberOfInterviews() {
+  //   this.interviewService.getMemberInterviews(this.userId).subscribe({
+  //     next: (res: any) => {
+  //       console.log('API Response:', res);   // full response
+  //       //this.assignCandidates = res;
+  //       console.log('Candidates:', this.assignCandidates); // after assign
+  //        this.assignCandidates = res.filter(
+  //       (c: any) => c.role?.toLowerCase() === 'chairman'
+  //     );
 
-        // ✅ Auto select first candidate
-        if (this.assignCandidates && this.assignCandidates.length > 0) {
-          this.selectCandidate(this.assignCandidates[0], 0);
-        }
-      },
-      error: (err) => console.error(err)
-    });
-  }
+  //       // ✅ Auto select first candidate
+  //       if (this.assignCandidates && this.assignCandidates.length > 0) {
+  //         this.selectCandidate(this.assignCandidates[0], 0);
+  //       }
+  //     },
+  //     error: (err) => console.error(err)
+  //   });
+  // }
 
   toggleDropdown() {
     this.isOpen = !this.isOpen;
   }
 
-selectCandidate(candidate: any, index: number) {
-  this.selectedIndex = index;
+// selectCandidate(candidate: any, index: number) {
+//   this.selectedIndex = index;
 
-  const candidateId = candidate.candidate_id;
+//   const candidateId = candidate.candidate_id;
 
-  // ✅ Loading state
-  this.panelMembers = null;
+//   // ✅ Loading state
+//   this.panelMembers = null;
 
-  forkJoin({
-    candidate: this.dashboardService.getCandidate(candidateId),
-    qa: this.dashboardService.getQA(candidateId),
-    panel: this.dashboardService.getPanelMembers(candidateId)
-  }).subscribe({
-    next: (res: any) => {
+//   forkJoin({
+//     candidate: this.dashboardService.getCandidate(candidateId),
+//     qa: this.dashboardService.getQA(candidateId),
+//     panel: this.dashboardService.getPanelMembers(candidateId)
+//   }).subscribe({
+//     next: (res: any) => {
 
-      // Candidate
-      this.selectedCandidate = res.candidate;
+//       // Candidate
+//       this.selectedCandidate = res.candidate;
 
-      // QA
-      this.selectedCandidate.qaList = res.qa?.qaList || [];
+//       // QA
+//       this.selectedCandidate.qaList = res.qa?.qaList || [];
 
-      // Clean skills
-      if (this.selectedCandidate.skills) {
-        this.selectedCandidate.skills =
-          this.selectedCandidate.skills.map((s: string) => s.trim());
-      }
+//       // Clean skills
+//       if (this.selectedCandidate.skills) {
+//         this.selectedCandidate.skills =
+//           this.selectedCandidate.skills.map((s: string) => s.trim());
+//       }
 
-       console.log('PANEL API RESPONSE 👉', res.panel);
-        console.log('PANEL 👉', this.panelMembers);
+//        console.log('PANEL API RESPONSE 👉', res.panel);
+//         console.log('PANEL 👉', this.panelMembers);
    
-       this.panelMembers = res.panel;
-      console.log('FINAL DATA 👉', this.selectedCandidate);
+//        this.panelMembers = res.panel;
+//       console.log('FINAL DATA 👉', this.selectedCandidate);
     
-    },
-    error: (err) => {
-      console.error(err);
-      this.panelMembers = []; // fallback
-    }
-  });
-}
+//     },
+//     error: (err) => {
+//       console.error(err);
+//       this.panelMembers = []; // fallback
+//     }
+//   });
+// }
 
 
 get completedCount(): number {

@@ -11,11 +11,16 @@ export class InterviewService {
 
   constructor(private http: HttpClient) {}
 
+   getInterviewDetails(userId: number) {
+    return this.http.get(`${this.baseUrl}/interviews/formatted/${userId}`);
+  }
+
+
   getByUser(userId: number) {
     return this.http.get(`${this.baseUrl}/interviews/user/${userId}`);
   }
 
-  getMemberInterviews(userId: number) {
-    return this.http.get(`${this.baseUrl}/member/interviews/${userId}`);
+  getMemberInterviews(userId: number, candidateId: number) {
+    return this.http.get(`${this.baseUrl}/member/interviews/${userId}/${candidateId}`);
   }
 }

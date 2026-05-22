@@ -3,11 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Router, RouterLink, RouterLinkActive, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-schedule',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, RouterLink, RouterLinkActive, RouterModule],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.css'
 })
@@ -18,11 +19,14 @@ export class ScheduleComponent implements OnInit {
   // ── API State ──
   isLoading: boolean = false;
   apiError: string = '';
+  loggedUser: any = null;
 
   // ── Multi-step flow ──
   currentStep: number = 1;
   scheduleSuccess: boolean = false;
   generatedInterviewId: string = '';
+
+  selectedCourse: string = '';
 
   // ── View All Interviews ──
   showAllInterviews: boolean = false;
@@ -35,12 +39,18 @@ export class ScheduleComponent implements OnInit {
   return d.toISOString().split('T')[0]; // e.g. "2011-04-18"
 }
 
-  constructor(private http: HttpClient) {}
+  // constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
-    this.loadUsersFromBackend();
-    this.loadPanels();
-  }
+  this.loggedUser = JSON.parse(localStorage.getItem('user') || 'null');  // add this line
+  this.loadUsersFromBackend();
+  this.loadPanels();
+}
+  // ngOnInit(): void {
+  //   this.loadUsersFromBackend();
+  //   this.loadPanels();
+  // }
 
   // ══════════════════════════════════════════════
   // STEP 1: BASIC SETUP
@@ -68,11 +78,17 @@ export class ScheduleComponent implements OnInit {
   }
 
   loadUsersFromBackend(): void {
-    this.http.get<any>(`${this.apiUrl}/api/users/interviewers`).subscribe({
-      next: (res) => { if (res.success) this.availableMembers = res.data; },
-      error: (err) => console.error('Failed to load users:', err)
-    });
-  }
+  this.http.get<any>(`${this.apiUrl}/api/users/interviewers`).subscribe({
+    next: (res) => {
+      if (res.success) {
+        this.availableMembers = res.data.filter(
+          (user: any) => user.role === 'member'
+        );
+      }
+    },
+    error: (err) => console.error('Failed to load users:', err)
+  });
+}
 
   loadPanels(): void {
     this.http.get<any>(`${this.apiUrl}/api/panels`).subscribe({
@@ -111,10 +127,13 @@ export class ScheduleComponent implements OnInit {
   }
 
   canProceedStep1(): boolean {
-    const basicValid = !!(this.appliedRole && this.interviewDate && this.startTime && this.endTime);
+    // 🛠️ Updated: Checks for 'selectedCourse' instead of 'appliedRole'
+    const basicValid = !!(this.selectedCourse && this.interviewDate && this.startTime && this.endTime);
+    
     const panelValid = this.panelMode === 'existing'
       ? !!this.selectedPanelId
       : !!(this.selectedMembers.length > 0 && this.chairmanUserId);
+      
     return basicValid && panelValid;
   }
   // Add this helper method in your component
@@ -125,6 +144,23 @@ formatScheduledAt(scheduledAt: string): { date: string; time: string } {
     date: d.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' }),
     time: d.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })
   };
+}
+//Monika
+get completedCount(): number {
+  return this.allInterviews.filter(iv => 
+    iv.status?.toLowerCase() === 'completed'
+  ).length;
+}
+
+get scheduledCount(): number {
+  return this.allInterviews.filter(iv => 
+    iv.status?.toLowerCase() === 'scheduled'
+  ).length;
+}
+logout(): void {
+  localStorage.clear();
+  sessionStorage.clear();
+  this.router.navigate(['/']);  // redirects to landing page
 }
 
   // ══════════════════════════════════════════════
@@ -277,13 +313,15 @@ formatScheduledAt(scheduledAt: string): { date: string; time: string } {
     this.isLoading = true;
     this.apiError = '';
 
-    const panelName = this.newPanelName || `${this.appliedRole} Panel`;
+    // 🛠️ Updated: Generate fallback panel name using your Course selection rather than appliedRole
+    const panelName = this.newPanelName || `${this.selectedCourse} Panel`;
 
     const payload: any = {
-      applied_role:   this.appliedRole,
-      interview_date: this.interviewDate,
-      start_time:     this.startTime,
-      end_time:       this.endTime,
+      // Keep applied_role as an empty or fallback string if your backend requires the key present
+      applied_role:               this.selectedCourse, 
+      interview_date:             this.interviewDate,
+      start_time:                 this.startTime,
+      end_time:                   this.endTime,
       ...(this.panelMode === 'existing'
         ? { panel_id: this.selectedPanelId }
         : { panel_name: panelName, chairman_user_id: this.chairmanUserId, member_user_ids: this.selectedMembers.map(m => m.id) }
@@ -298,7 +336,10 @@ formatScheduledAt(scheduledAt: string): { date: string; time: string } {
       student_email:              this.studentEmail,
       student_current_address:    this.studentCurrentAddress,
       student_permanent_address:  this.studentPermanentAddress,
-      student_course_program:     this.studentCourseProg,
+      
+      // 🔥 CRITICAL UPDATE: Maps the clean standardized course option directly to your Candidate table matching key
+      student_course_program:     this.selectedCourse,
+      
       student_department_branch:  this.studentDeptBranch,
       student_university:         this.studentUniversity,
       student_enrollment_no:      this.studentEnrollNo,

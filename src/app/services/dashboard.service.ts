@@ -18,15 +18,42 @@ export class DashboardService {
   return this.http.get(`${this.baseUrl}/candidate/${id}`);
  }
 
- getPanelMembers(candidateId: number) {
-    return this.http.get(`${this.baseUrl}/panel-members/${candidateId}`);
-  }
+//    getQA(id: number) {
+//   return this.http.get(`${this.baseUrl}/qa-evaluation-log/${id}`);
+//  }
 
-  saveEvaluation(payload: any) {
-    return this.http.post(`${this.baseUrl}/final-evaluation`, payload);
-  }
+ getQA(candidateId: number, memberId: number) {
+  return this.http.get(`${this.baseUrl}/qa-evaluation-log/${candidateId}/${memberId}`);
+}
 
-  getQA(id: number) {
-  return this.http.get(`${this.baseUrl}/qa-evaluation-log/${id}`);
- }
+getPanelMembers(candidateId: number) {
+  return this.http.get(`${this.baseUrl}/panel-members/${candidateId}`);
+}
+
+saveEvaluation(payload: any) {
+  return this.http.post(`${this.baseUrl}/final-evaluation`, payload);
+}
+
+saveFinalVerdict(data: any) {
+  return this.http.post(`${this.baseUrl}/save-final-verdict`, data);
+}
+
+getFinalMark(candidateId: number, memberId: number) {
+  return this.http.get(`${this.baseUrl}/final-mark/${candidateId}/${memberId}`);
+}
+
+getPanelQuestionScores(panelId: number) {
+  return this.http.get(`${this.baseUrl}/panel-question-scores/${panelId}`);
+}
+
+
+getPanelEvaluationFinalMark(panelId: number) {
+  return this.http.get(`${this.baseUrl}/panel-evaluation-final-mark/${panelId}`);
+}
+
+getFinalVerdict(candidateId: number, memberId: number) {
+  return this.http.get<any>(
+    `${this.baseUrl}/final-remark/${candidateId}/${memberId}`
+  );
+}
 }
