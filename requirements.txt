@@ -28,7 +28,7 @@ packaging==24.0
 pillow==10.4.0
 protobuf==3.20.3
 psycopg2-binary==2.9.11
-pydantic==2.7.0
+pydantic==2.5.3
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.0
 python-multipart==0.0.9
